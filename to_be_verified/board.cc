@@ -1,5 +1,6 @@
 #include "board.h"
 #include <stdexcept>
+#include <iostream>
 
 Board::Board() {
     // All cells default to Normal unless setup otherwise
@@ -16,15 +17,29 @@ std::pair<int, int> Board::findLinkPosition(char id, Player* player) {
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
             auto* link = grid[r][c].getLink();
-            if (link && link->getId() == id && link->getOwner() == player)
+            if (link && link->getId() == id) {
+                // Check ownership
+                if (link->getOwner() != player) {
+                    std::cout << "You cannot move link '" << id
+                              << "' – it belongs to the other player." << std::endl;
+                    return {-1, -1};
+                }
                 return {r, c};
+            }
         }
     }
-    throw std::runtime_error("Link not found on board");
+
+    std::cout << "Link '" << id << "' not found on the board, "
+                 "or it is not your link." << std::endl;
+    return {-1, -1};
 }
 
+
 bool Board::moveLink(char id, Player* player, Direction dir) {
-    auto [r, c] = findLinkPosition(id, player);
+    auto pos = findLinkPosition(id, player);
+    if (pos.first == -1) return false; // Invalid move, just exit
+    int r = pos.first;
+    int c = pos.second;
     int dr = 0, dc = 0;
     switch (dir) {
         case Direction::Up: dr = -1; break;
@@ -60,4 +75,19 @@ bool Board::moveLink(char id, Player* player, Direction dir) {
 
     src.removeLink();
     return true;
+}
+
+void Board::printBoard() {
+    for (int r = 0; r < 8; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            if (grid[r][c].getLink()) {
+                std::cout << grid[r][c].getLink()->getId();
+            } else if (grid[r][c].getType() == CellType::ServerPort) {
+                std::cout << 'S';
+            } else {
+                std::cout << '.';
+            }
+        }
+        std::cout << "\n";
+    }
 }
