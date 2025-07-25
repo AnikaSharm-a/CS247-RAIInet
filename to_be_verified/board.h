@@ -14,4 +14,5 @@ public:
     Cell& at(int row, int col) { return grid[row][col]; }
     bool moveLink(char id, Player* player, Direction dir);
     std::pair<int, int> findLinkPosition(char id, Player* player);
+    void printBoard();
 };

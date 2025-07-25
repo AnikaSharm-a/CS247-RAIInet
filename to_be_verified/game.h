@@ -4,7 +4,9 @@
 #include <vector>
 #include "board.h"
 #include "player.h"
-#include "controller.h"
+// #include "controller.h"
+
+class Controller;  // forward declare
 
 class Game {
     Board board;
