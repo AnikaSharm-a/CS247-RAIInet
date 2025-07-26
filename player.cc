@@ -5,8 +5,92 @@
 
 Player::Player(int id) : id(id) {}
 
+int Player::getId() const {
+    return id;
+}
+
+std::map<char, Link*>& Player::getLinks() {
+    return links;
+}
+
+std::set<int>& Player::getUsedAbilities() {
+    return usedAbilities;
+}
+
+int Player::getDownloadedVirus() const {
+    return downloadedVirus;
+}
+
+int Player::getDownloadedData() const {
+    return downloadedData;
+}
+
+int Player::getNumLinks() const {
+    return links.size();
+}
+
+int Player::getStrengthSum() const {
+    int total = 0;
+    for (const auto& [id, link] : links) {
+        total += link->getStrength();
+    }
+    return total;
+}
+
 void Player::addLink(Link* link) {
     links[link->getId()] = link;
+}
+
+Link* Player::getLink(char id) const {
+    auto it = links.find(id);
+    return it != links.end() ? it->second : nullptr;
+}
+
+void Player::removeLink(char id) {
+    links.erase(id);
+}
+
+bool Player::ownsLink(char id) const {
+    return links.find(id) != links.end();
+}
+
+std::vector<Link*> Player::getAllLinks() const {
+    std::vector<Link*> all;
+    for (const auto& [id, link] : links) {
+        all.push_back(link);
+    }
+    return all;
+}
+
+void Player::revealLink(char id) {
+    Link* link = getLink(id);
+    if (link) link->reveal();
+}
+
+bool Player::isLinkRevealed(char id) const {
+    Link* link = getLink(id);
+    return link ? link->isRevealed() : false;
+}
+
+bool Player::canUseAbility(int abilityID) const {
+    return abilityID >= 0 &&
+           abilityID < (int)abilities.size() &&
+           usedAbilities.find(abilityID) == usedAbilities.end();
+}
+
+int Player::getNumUnusedAbilities() const {
+    return abilities.size() - usedAbilities.size();
+}
+
+void Player::incrementDownload(Link* link) {
+    if (!link) return;
+    if (link->getType() == LinkType::Data) downloadedData++;
+    else downloadedVirus++;
+}
+
+void Player::resetDownloads() {
+    downloadedData = 0;
+    downloadedVirus = 0;
 }
 
 bool Player::hasWon() const {
@@ -17,9 +101,8 @@ bool Player::hasLost() const {
     return downloadedVirus >= 4;
 }
 
-void Player::incrementDownload(Link* link) {
-    if (link->getType() == LinkType::Data) downloadedData++;
-    else downloadedVirus++;
+bool Player::hasLostOrWon() const {
+    return hasWon() || hasLost();
 }
 
 // Ability management methods
