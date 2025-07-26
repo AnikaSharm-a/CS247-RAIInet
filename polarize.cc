@@ -14,12 +14,12 @@ void Polarize::use(Game* game,
                    int row,
                    int col)
 {
-    auto& board = game->getBoard();
-    Cell* cell = board.getCell(row, col);
-    if (!cell || cell->isEmpty())
+    Board* board = game->getBoard();
+    Cell& cell = board->at(row, col);
+    if (cell.isEmpty())
         throw invalid_argument("Polarize: no link at target cell");
 
-    Link* link = cell->getLink();
+    Link* link = cell.getLink();
     // only on opponent’s link
     if (link->getOwner() == player)
         throw invalid_argument("Polarize: can only polarize opponent’s link");

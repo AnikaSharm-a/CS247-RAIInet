@@ -84,10 +84,25 @@ void Board::printBoard() {
                 std::cout << grid[r][c].getLink()->getId();
             } else if (grid[r][c].getType() == CellType::ServerPort) {
                 std::cout << 'S';
+            } else if (grid[r][c].getType() == CellType::Firewall) {
+                std::cout << (grid[r][c].getOwnerId() == 0 ? 'm' : 'w');
             } else {
                 std::cout << '.';
             }
         }
         std::cout << "\n";
     }
+}
+
+bool Board::isServerPort(int row, int col) const {
+    return (row == 0 || row == 7) && (col == 3 || col == 4);
+}
+
+void Board::addFirewall(int row, int col, Player* player) {
+    if (row < 0 || row >= 8 || col < 0 || col >= 8) {
+        throw std::invalid_argument("Firewall position out of bounds");
+    }
+    
+    // Set the cell type to Firewall and store the player ID
+    grid[row][col] = Cell(CellType::Firewall, player->getId());
 }

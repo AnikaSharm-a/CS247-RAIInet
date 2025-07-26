@@ -24,4 +24,11 @@ public:
     bool hasWon() const;
     bool hasLost() const;
     void incrementDownload(Link* link);
+    
+    // Ability management
+    void addAbility(Ability* ability);
+    Ability* getAbility(int abilityId);
+    bool isAbilityUsed(int abilityId) const;
+    void markAbilityUsed(int abilityId);
+    int getNumAbilities() const;
 };

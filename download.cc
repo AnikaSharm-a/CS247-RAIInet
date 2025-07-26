@@ -16,12 +16,12 @@ void Download::use(Game* game,
                    int row,
                    int col)
 {
-    auto& board = game->getBoard();
-    Cell* cell = board.getCell(row, col);
-    if (!cell || cell->isEmpty())
+    Board* board = game->getBoard();
+    Cell& cell = board->at(row, col);
+    if (cell.isEmpty())
         throw invalid_argument("Download: no link at target cell");
 
-    Link* link = cell->getLink();
+    Link* link = cell.getLink();
     if (link->getOwner() == player)
         throw invalid_argument("Download: cannot download your own link");
 
