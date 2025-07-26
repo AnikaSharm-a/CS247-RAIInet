@@ -21,19 +21,24 @@ void Game::startGame() {
     gameOver = false;
 }
 
-void Game::checkVictory() {
+bool Game::checkVictory() {
     for (auto p : players) {
         if (p->hasWon()) {
             std::cout << "Player " << p->getId() << " wins by downloading 4 data!\n";
             gameOver = true;
-            return;
+            return true;
         }
         if (p->hasLost()) {
-            std::cout << "Player " << p->getId() << " loses by downloading 4 viruses!\n";
+            // Find the opponent (assuming 2 players)
+            int loserId = p->getId();
+            int winnerId = (loserId == 1) ? 2 : 1;
+            std::cout << "Player " << loserId << " loses by downloading 4 viruses!\n";
+            std::cout << "Player " << winnerId << " wins!\n";
             gameOver = true;
-            return;
+            return true;
         }
     }
+    return false;
 }
 
 // Returns the opposing player (assuming 2 players)
