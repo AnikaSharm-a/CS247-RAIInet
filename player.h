@@ -19,12 +19,38 @@ class Player {
 public:
     Player(int id);
 
-    int getId() const { return id; }
-    std::map<char, Link*>& getLinks() { return links; }
+    // Getters
+    int getId() const;
+    std::map<char, Link*>& getLinks();
+    std::set<int>& getUsedAbilities();
+    int getDownloadedVirus() const;
+    int getDownloadedData() const;
+    int getNumLinks() const;
+    int getStrengthSum() const;
+
+    // Link management
     void addLink(Link* link);
+    Link* getLink(char id) const;
+    void removeLink(char id);
+    bool ownsLink(char id) const;
+    std::vector<Link*> getAllLinks() const;
+
+    // Reveal
+    void revealLink(char id);
+    bool isLinkRevealed(char id) const;
+
+    // Abilities
+    bool canUseAbility(int abilityID) const;
+    int getNumUnusedAbilities() const;
+
+    // Download counters
+    void incrementDownload(Link* link);
+    void resetDownloads();
+
+    // Game status
     bool hasWon() const;
     bool hasLost() const;
-    void incrementDownload(Link* link);
+    bool hasLostOrWon() const;
     
     // Ability management
     void addAbility(Ability* ability);

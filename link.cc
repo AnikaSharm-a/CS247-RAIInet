@@ -1,9 +1,18 @@
 #include "link.h"
+#include "player.h"
 
 Link* Link::battle(Link* opponent) {
-    revealed = true;
+    if (!opponent) return this;
+
+    int myPower = strength + (boosted ? 1 : 0);
+    int opponentPower = opponent->getStrength() + (opponent->isBoosted() ? 1 : 0);
+
+    this->reveal();
     opponent->reveal();
-    if (strength > opponent->getStrength()) return this;
-    if (strength < opponent->getStrength()) return opponent;
-    return this; // tie goes to initiating player
+
+    if (myPower > opponentPower) {
+        return this;
+    } else {
+        return opponent;
+    }
 }
