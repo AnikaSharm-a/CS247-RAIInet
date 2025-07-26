@@ -26,6 +26,6 @@ void LinkBoost::use(Game* game,
         throw invalid_argument("LinkBoost: can only boost your own link");
 
     // Mark it boosted so when it moves it can jump one extra square
-    link->boost(true);
+    link->boost();
     boostedLinks.insert(link);
 }
