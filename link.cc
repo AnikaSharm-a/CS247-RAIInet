@@ -10,9 +10,9 @@ Link* Link::battle(Link* opponent) {
     this->reveal();
     opponent->reveal();
 
-    if (myPower > opponentPower) {
-        return this;
-    } else {
+    if (myPower < opponentPower) {
         return opponent;
+    } else {
+        return this;
     }
 }

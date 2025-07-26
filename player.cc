@@ -35,7 +35,9 @@ int Player::getNumLinks() const {
 
 int Player::getStrengthSum() const {
     int total = 0;
-    for (const auto& [id, link] : links) {
+    for (const auto& entry : links) {
+        auto id = entry.first;
+        auto link  = entry.second;
         total += link->getStrength();
     }
     return total;
@@ -60,7 +62,9 @@ bool Player::ownsLink(char id) const {
 
 std::vector<Link*> Player::getAllLinks() const {
     std::vector<Link*> all;
-    for (const auto& [id, link] : links) {
+    for (const auto& entry : links) {
+        auto id = entry.first;
+        auto link = entry.second;
         all.push_back(link);
     }
     return all;
@@ -88,8 +92,12 @@ int Player::getNumUnusedAbilities() const {
 
 void Player::incrementDownload(Link* link) {
     if (!link) return;
-    if (link->getType() == LinkType::Data) downloadedData++;
-    else downloadedVirus++;
+    if (link->getType() == LinkType::Data) { downloadedData++;
+    std::cout << "======debug print incrementing data" << endl;
+    }
+    else { downloadedVirus++;
+    std::cout << "======debug print incrementing virus" << endl;
+    }
 }
 
 void Player::resetDownloads() {

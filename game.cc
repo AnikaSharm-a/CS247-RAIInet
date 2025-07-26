@@ -149,6 +149,8 @@ bool Game::playerMove(char id, Direction dir) {
             break;
         case MoveResult::BattleWon:
             // Current player downloads opponent's link
+            std::cout << "DEBUG: BattleWon -> incrementDownload for affectedLink = "
+              << outcome.affectedLink->getId() << std::endl;
             currentPlayer->incrementDownload(outcome.affectedLink);
             break;
         case MoveResult::BattleLost:
