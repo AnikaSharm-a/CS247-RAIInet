@@ -18,7 +18,6 @@ class Game {
 public:
     void startGame();
     void checkVictory();
-    void resolveBattle(Link* attacker, Link* defender);
     void download(Link* link, Player* targetPlayer);
     void useAbility(Player* player, int abilityId, char args[]);
 
@@ -27,6 +26,9 @@ public:
     int getCurrentPlayerIdx() const;
     bool isGameOver() const;
     Controller* getController();
+
+    bool playerMove(char linkId, Direction dir);
+    Player* getOpponentPlayer();
 
     // Setters
     void setCurrentPlayerIdx(int idx);
