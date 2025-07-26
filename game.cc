@@ -136,6 +136,7 @@ bool Game::playerMove(char id, Direction dir) {
     // For now, assume this function exists as below and returns true if move succeeded.
     // You will need to implement it accordingly.
     auto outcome = board.moveLink(id, currentPlayer, dir);
+    // std::cout << "Board::moveLink returning " << static_cast<int>(outcome.result) << std::endl;
 
     if (!outcome.success) {
         std::cout << "Invalid move.\n";
@@ -149,8 +150,8 @@ bool Game::playerMove(char id, Direction dir) {
             break;
         case MoveResult::BattleWon:
             // Current player downloads opponent's link
-            std::cout << "DEBUG: BattleWon -> incrementDownload for affectedLink = "
-              << outcome.affectedLink->getId() << std::endl;
+            // std::cout << "DEBUG: BattleWon -> incrementDownload for affectedLink = "
+            //   << outcome.affectedLink->getId() << std::endl;
             currentPlayer->incrementDownload(outcome.affectedLink);
             break;
         case MoveResult::BattleLost:

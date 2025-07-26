@@ -91,9 +91,10 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             outcome.result = MoveResult::BattleWon;
             outcome.affectedLink = defender;
 
-            std::cerr << "MoveResult = " << static_cast<int>(outcome.result)
-          << " affectedLink=" << (outcome.affectedLink ? outcome.affectedLink->getId() : '?')
-          << std::endl;
+            // std::cerr << "MoveResult = " << static_cast<int>(outcome.result)
+        //   << " affectedLink=" << (outcome.affectedLink ? outcome.affectedLink->getId() : '?')
+        //   << std::endl;
+        //   std::cout << "typeid(outcome.result).name() = " << typeid(outcome.result).name() << std::endl;
             return outcome;
         } else {
             // Defender wins, attacker is removed
