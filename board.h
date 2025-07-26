@@ -15,4 +15,8 @@ public:
     bool moveLink(char id, Player* player, Direction dir);
     std::pair<int, int> findLinkPosition(char id, Player* player);
     void printBoard();
+    
+    // Methods needed for abilities
+    bool isServerPort(int row, int col) const;
+    void addFirewall(int row, int col, Player* player);
 };

@@ -23,7 +23,8 @@ public:
     bool isRevealed() const { return revealed; }
     void reveal() { revealed = true; }
     bool isBoosted() const { return boosted; }
-    void boost() { boosted = true; }
+    void boost(bool boosted = true) { this->boosted = boosted; }
+    void setType(LinkType type) { this->type = type; }
 
     // Simulate a battle between this and opponent
     Link* battle(Link* opponent); // implemented below
