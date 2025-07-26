@@ -25,6 +25,5 @@ public:
     bool isBoosted() const { return boosted; }
     void boost() { boosted = true; }
 
-    // Simulate a battle between this and opponent
-    Link* battle(Link* opponent); // implemented below
+    Link* battle(Link* opponent);
 };
