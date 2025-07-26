@@ -17,6 +17,7 @@ public:
         : id(id), type(type), strength(strength), owner(owner) {}
 
     char getId() const { return id; }
+    void setType(LinkType newType) { type = newType; }
     LinkType getType() const { return type; }
     int getStrength() const { return strength; }
     Player* getOwner() const { return owner; }
