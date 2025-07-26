@@ -2,6 +2,7 @@
 #include <map>
 #include <vector>
 #include <set>
+#include <string>
 #include "linkType.h"
 
 class Link;      // forward declare
@@ -31,4 +32,11 @@ public:
     bool isAbilityUsed(int abilityId) const;
     void markAbilityUsed(int abilityId);
     int getNumAbilities() const;
+    
+    // Enhanced ability management
+    void displayAbilities() const;
+    bool hasUnusedAbilities() const;
+    int getUnusedAbilityCount() const;
+    std::vector<std::string> getAbilityNames() const;
+    void resetAbilities(); // For testing or new games
 };
