@@ -13,6 +13,10 @@ std::map<char, Link*>& Player::getLinks() {
     return links;
 }
 
+const std::map<char, Link*>& Player::getLinks() const {
+    return links;
+}
+
 std::set<int>& Player::getUsedAbilities() {
     return usedAbilities;
 }

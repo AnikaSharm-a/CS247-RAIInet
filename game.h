@@ -22,7 +22,9 @@ public:
     void useAbility(Player* player, int abilityId, char args[]);
 
     Board* getBoard();
+    const Board* getBoard() const;
     std::vector<Player*>& getPlayers();
+    const std::vector<Player*>& getPlayers() const; 
     int getCurrentPlayerIdx() const;
     bool isGameOver() const;
     Controller* getController();

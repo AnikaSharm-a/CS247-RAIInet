@@ -31,6 +31,7 @@ public:
     Board();
 
     Cell& at(int row, int col) { return grid[row][col]; }
+    const Cell& at(int row, int col) const { return grid[row][col]; }
     MoveOutcome moveLink(char id, Player* player, Direction dir);
     std::pair<int, int> findLinkPosition(char id, Player* player);
     void printBoard();
