@@ -24,7 +24,7 @@ void Controller::play(std::istream &in) {
 
             auto &players = game->getPlayers();
             Player* p = players[game->getCurrentPlayerIdx()];
-            bool success = game->getBoard()->moveLink(id, p, dir);
+            bool success = game->getBoard()->moveLink(id, p, dir).success;
             if (!success) {
                 std::cout << "Invalid move\n";
             } else {

@@ -34,10 +34,14 @@ std::pair<int, int> Board::findLinkPosition(char id, Player* player) {
     return {-1, -1};
 }
 
-
-bool Board::moveLink(char id, Player* player, Direction dir) {
+MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
+    MoveOutcome outcome;
     auto pos = findLinkPosition(id, player);
-    if (pos.first == -1) return false; // Invalid move, just exit
+    if (pos.first == -1) {
+        outcome.success = false;
+        outcome.result = MoveResult::Invalid;
+        return outcome;
+    }
     int r = pos.first;
     int c = pos.second;
     int dr = 0, dc = 0;
@@ -48,33 +52,70 @@ bool Board::moveLink(char id, Player* player, Direction dir) {
         case Direction::Right: dc = 1; break;
     }
     int nr = r + dr, nc = c + dc;
-    if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) return false;
+    if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) {
+        outcome.success = false;
+        outcome.result = MoveResult::Invalid;
+        return outcome;
+    }
 
     Cell& src = grid[r][c];
     Cell& dest = grid[nr][nc];
 
     Link* moving = src.getLink();
-    if (!moving) return false;
+    if (!moving) {
+        outcome.success = false;
+        outcome.result = MoveResult::Invalid;
+        return outcome;
+    }
+
+    outcome.movedLink = moving;
+    outcome.destRow = nr;
+    outcome.destCol = nc;
 
     if (!dest.isEmpty()) {
-        if (dest.getLink()->getOwner() == player) return false;
+        if (dest.getLink()->getOwner() == player) {
+            outcome.success = false;
+            outcome.result = MoveResult::Invalid;
+            return outcome;
+        }
 
         Link* defender = dest.getLink();
         Link* winner = moving->battle(defender);
+
         if (winner == moving) {
+            // Moving link wins battle, replaces defender
             dest.setLink(moving);
-            player->incrementDownload(defender);
-        } else {
             src.removeLink();
-            defender->getOwner()->incrementDownload(moving);
-            return true;
+
+            outcome.success = true;
+            outcome.result = MoveResult::BattleWon;
+            outcome.affectedLink = defender;
+            return outcome;
+        } else {
+            // Defender wins, attacker is removed
+            src.removeLink();
+
+            outcome.success = true;
+            outcome.result = MoveResult::BattleLost;
+            outcome.affectedLink = moving;
+            return outcome;
         }
     } else {
+        // Empty destination cell
         dest.setLink(moving);
-    }
+        src.removeLink();
 
-    src.removeLink();
-    return true;
+        // Check if moved onto opponent's server port (optional: you might want to signal download)
+        if (dest.getType() == CellType::ServerPort && dest.getOwnerId() != player->getId()) {
+            outcome.success = true;
+            outcome.result = MoveResult::DownloadedOnServerPort;
+            return outcome;
+        }
+
+        outcome.success = true;
+        outcome.result = MoveResult::Moved;
+        return outcome;
+    }
 }
 
 void Board::printBoard() {
