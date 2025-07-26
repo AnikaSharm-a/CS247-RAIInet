@@ -17,7 +17,7 @@ class Game {
 
 public:
     void startGame();
-    void checkVictory();
+    bool checkVictory();
     void download(Link* link, Player* targetPlayer);
     void useAbility(Player* player, int abilityId, char args[]);
 
