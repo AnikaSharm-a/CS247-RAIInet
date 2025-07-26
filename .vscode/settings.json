@@ -52,6 +52,7 @@
         "valarray": "cpp",
         "cwctype": "cpp",
         "numbers": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "cstdarg": "cpp"
     }
 }

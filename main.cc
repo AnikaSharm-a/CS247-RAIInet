@@ -150,15 +150,39 @@ void runGame() {
     delete p2;
 }
 
-int main(int argc, char* argv[]) {
-    if (argc > 1) {
-        std::string arg = argv[1];
-        if (arg == "test") {
-            runTest();
-            return 0;
-        }
-    }
+// int main(int argc, char* argv[]) {
+//     if (argc > 1) {
+//         std::string arg = argv[1];
+//         if (arg == "test") {
+//             runTest();
+//             return 0;
+//         }
+//     }
 
-    runGame();
+//     runGame();
+//     return 0;
+// }
+
+int main(int argc, char* argv[]) {
+    TextDisplay td(8);
+    Game game;
+
+    Player *p1 = new Player(1);
+    Player *p2 = new Player(2);
+
+    game.getPlayers().push_back(p1);
+    game.getPlayers().push_back(p2);
+
+    Controller controller(&td, &game);
+    game.setController(&controller);
+
+    game.startGame();
+
+    std::cout << "Welcome to RAIInet! Player 1 goes first.\n";
+    controller.play(std::cin);
+
+    delete p1;
+    delete p2;
+
     return 0;
 }

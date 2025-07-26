@@ -1,20 +1,19 @@
-#ifndef TEXTDISPLAY_H
-#define TEXTDISPLAY_H
-
-#include "view.h"
-#include "cellType.h"
+#pragma once
 #include <vector>
-#include <iostream>
+#include <ostream>
+#include "view.h"
+
+class Game; // forward declaration
 
 class TextDisplay : public View {
-    std::vector<std::vector<int>> theDisplay;
+    std::vector<std::vector<char>> theDisplay;
 
 public:
     TextDisplay(int gridSize);
 
-    void notify(int row, int col, CellType state) override;
+    // Updates a single cell character (from Board notifications)
+    // void notify(int row, int col, char symbol) override;
 
-    void print(std::ostream& out) const override;
+    // Prints the entire game state: both players + board
+    void print(const Game& game, std::ostream &out) const override;
 };
-
-#endif 
