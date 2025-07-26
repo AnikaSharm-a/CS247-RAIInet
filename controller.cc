@@ -80,7 +80,8 @@ void Controller::play(std::istream &in) {
                     continue;
                 }
 
-                bool success = game->getBoard()->moveLink(id, currentPlayer, dir).success;
+                // bool success = game->getBoard()->moveLink(id, currentPlayer, dir).success;
+                bool success = game->playerMove(id, dir);
                 if (!success) {
                     std::cout << "Invalid move\n";
                 } else {
@@ -109,6 +110,6 @@ void Controller::play(std::istream &in) {
         if (game->checkVictory()) break;
 
         // Switch to next player
-        game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
+        // game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
     }
 }
