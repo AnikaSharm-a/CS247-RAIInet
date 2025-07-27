@@ -7,8 +7,12 @@ Board::Board() {
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
             CellType type = CellType::Normal;
-            if ((r == 0 || r == 7) && (c == 3 || c == 4)) type = CellType::ServerPort;
-            grid[r][c] = Cell(type);
+            int ownerId = -1;
+            if ((r == 0 || r == 7) && (c == 3 || c == 4)) {
+                type = CellType::ServerPort;
+                ownerId = (r == 0 ? 1 : 2);
+            }
+            grid[r][c] = Cell(type, ownerId);
         }
     }
 }
@@ -21,7 +25,7 @@ std::pair<int, int> Board::findLinkPosition(char id, Player* player) {
                 // Check ownership
                 if (link->getOwner() != player) {
                     std::cout << "You cannot move link '" << id
-                              << "' – it belongs to the other player." << std::endl;
+                              << " - it belongs to the other player." << std::endl;
                     return {-1, -1};
                 }
                 return {r, c};
@@ -53,6 +57,25 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
     }
     int nr = r + dr, nc = c + dc;
     if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) {
+        // Allow moving off the opponent's side (download)
+        // Conditions:
+        // - Player 1 moves upwards out of row 0
+        // - Player 2 moves downwards out of row 7
+        bool offOpponentSide =
+            (player->getId() == 1 && nr >= 8) ||
+            (player->getId() == 2 && nr < 0);
+
+        if (offOpponentSide) {
+            outcome.movedLink = grid[r][c].getLink();
+            outcome.affectedLink = grid[r][c].getLink();
+            outcome.affectedLink->reveal();
+            grid[r][c].removeLink(); // Remove from board
+            outcome.success = true;
+            outcome.result = MoveResult::DownloadedOffBoard;
+            return outcome;
+        }
+
+        // Any other out-of-bounds is invalid
         outcome.success = false;
         outcome.result = MoveResult::Invalid;
         return outcome;
@@ -106,16 +129,28 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             return outcome;
         }
     } else {
-        // Empty destination cell
-        dest.setLink(moving);
-        src.removeLink();
 
-        // Check if moved onto opponent's server port (optional: you might want to signal download)
+        // Prevent moving into own server port
+        if (dest.getType() == CellType::ServerPort && dest.getOwnerId() == player->getId()) {
+            outcome.success = false;
+            outcome.result = MoveResult::Invalid;
+            return outcome;
+        }
+
+        // Check for opponent's server port BEFORE placing the link
         if (dest.getType() == CellType::ServerPort && dest.getOwnerId() != player->getId()) {
+            outcome.affectedLink = moving;
+            outcome.affectedLink->reveal();
+            src.removeLink();        // remove from source
+            dest.removeLink();       // ensure dest is empty
             outcome.success = true;
             outcome.result = MoveResult::DownloadedOnServerPort;
             return outcome;
         }
+
+        // Empty destination cell
+        dest.setLink(moving);
+        src.removeLink();
 
         outcome.success = true;
         outcome.result = MoveResult::Moved;
