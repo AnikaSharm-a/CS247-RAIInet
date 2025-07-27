@@ -65,30 +65,30 @@ void Game::startGame() {
             ? std::vector<char>{'a','b','c','f','g','h','d','e'} // placement order
             : std::vector<char>{'A','B','C','F','G','H','D','E'};
 
-        if (isP1) {
-            // Player 1 (bottom)
+        if (!isP1) {
+            // Player 2 (bottom)
             // Row 7: columns 0,1,2 then skip 3,4 then 5,6,7
-            board.at(7,0).setLink(p->getLink('a'));
-            board.at(7,1).setLink(p->getLink('b'));
-            board.at(7,2).setLink(p->getLink('c'));
-            board.at(7,5).setLink(p->getLink('f'));
-            board.at(7,6).setLink(p->getLink('g'));
-            board.at(7,7).setLink(p->getLink('h'));
+            board.at(7,0).setLink(p->getLink('A'));
+            board.at(7,1).setLink(p->getLink('B'));
+            board.at(7,2).setLink(p->getLink('C'));
+            board.at(7,5).setLink(p->getLink('F'));
+            board.at(7,6).setLink(p->getLink('G'));
+            board.at(7,7).setLink(p->getLink('H'));
             // Row 6: columns 3,4 (d,e)
-            board.at(6,3).setLink(p->getLink('d'));
-            board.at(6,4).setLink(p->getLink('e'));
+            board.at(6,3).setLink(p->getLink('D'));
+            board.at(6,4).setLink(p->getLink('E'));
         } else {
-            // Player 2 (top)
+            // Player 1 (top)
             // Row 0: columns 0,1,2 then skip 3,4 then 5,6,7
-            board.at(0,0).setLink(p->getLink('A'));
-            board.at(0,1).setLink(p->getLink('B'));
-            board.at(0,2).setLink(p->getLink('C'));
-            board.at(0,5).setLink(p->getLink('F'));
-            board.at(0,6).setLink(p->getLink('G'));
-            board.at(0,7).setLink(p->getLink('H'));
+            board.at(0,0).setLink(p->getLink('a'));
+            board.at(0,1).setLink(p->getLink('b'));
+            board.at(0,2).setLink(p->getLink('c'));
+            board.at(0,5).setLink(p->getLink('f'));
+            board.at(0,6).setLink(p->getLink('g'));
+            board.at(0,7).setLink(p->getLink('h'));
             // Row 1: columns 3,4 (D,E)
-            board.at(1,3).setLink(p->getLink('D'));
-            board.at(1,4).setLink(p->getLink('E'));
+            board.at(1,3).setLink(p->getLink('d'));
+            board.at(1,4).setLink(p->getLink('e'));
         }
     };
 
