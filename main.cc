@@ -5,6 +5,7 @@
 #include "game.h"
 #include "controller.h"
 #include "textdisplay.h"
+#include "graphicdisplay.h"
 #include "player.h"
 #include "link.h"
 
@@ -13,6 +14,8 @@
 
 int main(int argc, char* argv[]) {
     TextDisplay td(8);
+    GraphicDisplay gd(8, 500, 500);
+    View* viewToUse = &td;
     Game game;
 
     Player *p1 = new Player(1);
@@ -46,7 +49,11 @@ int main(int argc, char* argv[]) {
     game.getPlayers().push_back(p1);
     game.getPlayers().push_back(p2);
 
-    Controller controller(&td, &game);
+    if (graphics) {
+        viewToUse = &gd;
+    }
+
+    Controller controller(viewToUse, &game);
     game.setController(&controller);
 
     try {
