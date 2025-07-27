@@ -146,6 +146,9 @@ void Player::displayAbilities() const {
     std::cout << "Player " << id << " Abilities:\n";
     for (int i = 0; i < static_cast<int>(abilities.size()); ++i) {
         int abilityId = i + 1;
+        if (!abilities[i]) {
+            continue;
+        }
         std::string status = isAbilityUsed(abilityId) ? "[USED]" : "[AVAILABLE]";
         std::cout << "  " << abilityId << ". " << abilities[i]->getName() << " " << status << "\n";
     }
