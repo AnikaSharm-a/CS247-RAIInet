@@ -33,7 +33,9 @@ void Controller::play(std::istream &in) {
             }
 
             else if (cmd == "abilities") {
+                std::cout << "begin displaying abilities\n";
                 currentPlayer->displayAbilities();
+                std::cout << "end displaying abilities\n";
             }
 
             else if (cmd == "ability") {

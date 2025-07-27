@@ -48,17 +48,20 @@ void TextDisplay::print(const Game &game, std::ostream &out) const {
     const Player* p1 = players[0];
     const Player* p2 = players[1];
 
-    // Print Player 1 info
-    out << "Player 1:\n";
-    out << "Downloaded: " << p1->getDownloadedData() << "D, " << p1->getDownloadedVirus() << "V\n";
-    out << "Abilities: " << p1->getNumUnusedAbilities() << "\n";
+    // Print Player 2 info similarly
+    out << "Player 2:\n";
+    out << "Downloaded: " << p2->getDownloadedData() << "D, " << p2->getDownloadedVirus() << "V\n";
+    out << "Abilities: " << p2->getNumUnusedAbilities() << "\n";
 
-    // Player 1 links: iterate map
-    for (const auto& pair : p1->getLinks()) {
+    for (const auto& pair : p2->getLinks()) {
         char id = pair.first;
-        Link* link = pair.second;
-        std::string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
-        out << id << ": " << typeStr << link->getStrength() << " ";
+        Link* link = pair.second;  
+        if (link->isRevealed()) {
+            std::string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
+            out << id << ": " << typeStr << link->getStrength() << " ";
+        } else {
+            out << id << ": ? ";
+        }
     }
     out << "\n";
 
@@ -98,20 +101,17 @@ void TextDisplay::print(const Game &game, std::ostream &out) const {
 
     out << "========\n";
 
-    // Print Player 2 info similarly
-    out << "Player 2:\n";
-    out << "Downloaded: " << p2->getDownloadedData() << "D, " << p2->getDownloadedVirus() << "V\n";
-    out << "Abilities: " << p2->getNumUnusedAbilities() << "\n";
+    // Print Player 1 info
+    out << "Player 1:\n";
+    out << "Downloaded: " << p1->getDownloadedData() << "D, " << p1->getDownloadedVirus() << "V\n";
+    out << "Abilities: " << p1->getNumUnusedAbilities() << "\n";
 
-    for (const auto& pair : p2->getLinks()) {
+    // Player 1 links: iterate map
+    for (const auto& pair : p1->getLinks()) {
         char id = pair.first;
-        Link* link = pair.second;  
-        if (link->isRevealed()) {
-            std::string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
-            out << id << ": " << typeStr << link->getStrength() << " ";
-        } else {
-            out << id << ": ? ";
-        }
+        Link* link = pair.second;
+        std::string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
+        out << id << ": " << typeStr << link->getStrength() << " ";
     }
     out << "\n";
 }
