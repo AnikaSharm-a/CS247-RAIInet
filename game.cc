@@ -29,12 +29,12 @@ void Game::startGame() {
     // --- 1. Give each player 5 abilities ---
     // (Replace this with however your Ability objects are created; 
     // if you have an AbilityFactory, call that instead)
-    for (auto *p : players) {
-        for (int i = 0; i < 5; ++i) {
-            // Placeholder: add nullptr if you don't have real Ability objects yet
-            p->addAbility(nullptr);
-        }
-    }
+    // for (auto *p : players) {
+    //     for (int i = 0; i < 5; ++i) {
+    //         // Placeholder: add nullptr if you don't have real Ability objects yet
+    //         p->addAbility(nullptr);
+    //     }
+    // }
 
     // --- 2. Define link configuration ---
     // Order: V1, D4, V3, V2, D3, V4, D2, D1
