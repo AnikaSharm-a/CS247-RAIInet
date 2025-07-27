@@ -89,6 +89,8 @@ void TextDisplay::print(const Game &game, std::ostream &out) const {
                 // Print Server Ports as 'S', otherwise '.'
                 if (cell.getType() == CellType::ServerPort) {
                     out << "S";
+                } else if (cell.getType() == CellType::Firewall) {
+                    out << "F";
                 } else {
                     out << ".";
                 }
