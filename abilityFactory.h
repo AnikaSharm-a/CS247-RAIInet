@@ -25,6 +25,9 @@ public:
     
     // Get ability name from code
     static std::string getAbilityName(char abilityCode);
+    
+    // Get usage information and rules
+    static std::string getUsageInfo();
 
 private:
     // Helper method to validate single ability code

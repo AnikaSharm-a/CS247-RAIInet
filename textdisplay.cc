@@ -5,8 +5,10 @@
 #include "link.h"
 #include "ability.h"
 
+using namespace std;
+
 TextDisplay::TextDisplay(int gridSize) {
-    theDisplay.assign(gridSize, std::vector<char>(gridSize, '.'));
+    theDisplay.assign(gridSize, vector<char>(gridSize, '.'));
     // Mark server ports
     theDisplay[0][3] = 'S';
     theDisplay[0][4] = 'S';
@@ -18,7 +20,7 @@ TextDisplay::TextDisplay(int gridSize) {
 //     theDisplay[row][col] = symbol;
 // }
 
-static void printPlayerInfo(std::ostream &out, Player *p, bool showLinks) {
+static void printPlayerInfo(ostream &out, Player *p, bool showLinks) {
     out << "Player " << p->getId() << ":\n";
     out << "Downloaded: " << p->getDownloadedData()
         << "D, " << p->getDownloadedVirus() << "V\n";
@@ -42,7 +44,7 @@ static void printPlayerInfo(std::ostream &out, Player *p, bool showLinks) {
     if (count % 4 != 0) out << "\n";
 }
 
-void TextDisplay::print(const Game &game, std::ostream &out) const {
+void TextDisplay::print(const Game &game, ostream &out) const {
     // Access players const-correctly
     const auto& players = game.getPlayers(); // Make sure getPlayers() returns const ref for const Game
     const Player* p1 = players[0];
@@ -58,7 +60,7 @@ void TextDisplay::print(const Game &game, std::ostream &out) const {
     for (const auto& pair : p1->getLinks()) {
         char id = pair.first;
         Link* link = pair.second;
-        std::string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
+        string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
         out << id << ": " << typeStr << link->getStrength() << " ";
     }
     out << "\n";
@@ -90,7 +92,7 @@ void TextDisplay::print(const Game &game, std::ostream &out) const {
                 if (cell.getType() == CellType::ServerPort) {
                     out << "S";
                 } else if (cell.getType() == CellType::Firewall) {
-                    out << "F";
+                    out << (cell.getOwnerId() == 1 ? 'm' : 'w');
                 } else {
                     out << ".";
                 }
@@ -111,7 +113,7 @@ void TextDisplay::print(const Game &game, std::ostream &out) const {
         char id = pair.first;
         Link* link = pair.second;  
         if (link->isRevealed()) {
-            std::string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
+            string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
             out << id << ": " << typeStr << link->getStrength() << " ";
         } else {
             out << id << ": ? ";

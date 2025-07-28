@@ -105,21 +105,49 @@ bool Game::playerMove(char id, Direction dir) {
             break;
         case MoveResult::BattleWon:
             // Current player downloads opponent's link
-            // std::cout << "DEBUG: BattleWon -> incrementDownload for affectedLink = "
-            //   << outcome.affectedLink->getId() << std::endl;
+            // Remove boost effect from the downloaded link
+            if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
+                outcome.affectedLink->removeBoost();
+            }
             currentPlayer->incrementDownload(outcome.affectedLink);
             break;
         case MoveResult::BattleLost:
             // Opponent downloads current player's link
+            // Remove boost effect from the downloaded link
+            if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
+                outcome.affectedLink->removeBoost();
+            }
             opponent->incrementDownload(outcome.affectedLink);
             break;
         case MoveResult::DownloadedOffBoard:
             // Current player downloads their own link escaped off board
+            // Remove boost effect from the downloaded link
+            if (outcome.movedLink && outcome.movedLink->isBoosted()) {
+                outcome.movedLink->removeBoost();
+            }
             currentPlayer->incrementDownload(outcome.movedLink);
             break;
         case MoveResult::DownloadedOnServerPort:
             // Opponent downloads current player's link that moved onto their server port
+            // Remove boost effect from the downloaded link
+            if (outcome.movedLink && outcome.movedLink->isBoosted()) {
+                outcome.movedLink->removeBoost();
+            }
             opponent->incrementDownload(outcome.movedLink);
+            break;
+        case MoveResult::DownloadedByFirewall:
+            // Virus link was downloaded by firewall effect
+            // Remove boost effect from the downloaded link
+            if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
+                outcome.affectedLink->removeBoost();
+            }
+            // The virus owner downloads their own virus
+            if (outcome.affectedLink) {
+                Player* virusOwner = outcome.affectedLink->getOwner();
+                if (virusOwner) {
+                    virusOwner->incrementDownload(outcome.affectedLink);
+                }
+            }
             break;
         case MoveResult::Invalid:
             break;
@@ -163,6 +191,26 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
         }
         row = pos.first;
         col = pos.second;
+    } else if (abilityName == "Download" || abilityName == "Polarize" || abilityName == "Scan") {
+        if (args[0] == '\0') {
+            throw std::invalid_argument(abilityName + " requires a link ID");
+        }
+        char linkId = args[0];
+        // Find the link on the board (can be any player's link)
+        bool found = false;
+        for (int r = 0; r < 8 && !found; ++r) {
+            for (int c = 0; c < 8 && !found; ++c) {
+                auto* link = board.at(r, c).getLink();
+                if (link && link->getId() == linkId) {
+                    row = r;
+                    col = c;
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            throw std::invalid_argument("Link '" + std::string(1, linkId) + "' not found on the board");
+        }
     } else {
         std::string argsStr(args);
         size_t spacePos = argsStr.find(' ');

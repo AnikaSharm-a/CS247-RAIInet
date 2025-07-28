@@ -27,5 +27,4 @@ void LinkBoost::use(Game* game,
 
     // Mark it boosted so when it moves it can jump one extra square
     link->boost();
-    boostedLinks.insert(link);
 }

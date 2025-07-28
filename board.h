@@ -10,7 +10,8 @@ enum class MoveResult {
     BattleWon,
     BattleLost,
     DownloadedOffBoard,
-    DownloadedOnServerPort
+    DownloadedOnServerPort,
+    DownloadedByFirewall
 };
 
 struct MoveOutcome {
@@ -34,7 +35,6 @@ public:
     const Cell& at(int row, int col) const { return grid[row][col]; }
     MoveOutcome moveLink(char id, Player* player, Direction dir);
     std::pair<int, int> findLinkPosition(char id, Player* player);
-    void printBoard();
     
     // Methods needed for abilities
     bool isServerPort(int row, int col) const;

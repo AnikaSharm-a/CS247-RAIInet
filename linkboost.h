@@ -2,14 +2,10 @@
 #define LINKBOOST_H
 
 #include "ability.h"
-#include <set>
-using namespace std;
 
 class Link;
 
 class LinkBoost : public Ability {
-    set<Link*> boostedLinks;
-
 public:
     LinkBoost();
     ~LinkBoost() override = default;
