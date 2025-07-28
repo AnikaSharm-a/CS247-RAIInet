@@ -18,82 +18,37 @@ void Game::setCurrentPlayerIdx(int idx) { currentPlayerIdx = idx; }
 void Game::setGameOver(bool over) { gameOver = over; }
 void Game::setController(Controller* c) { controller = c; }
 
+void Game::setupLinksForPlayer(Player* p, bool isPlayer1) {
+    if (isPlayer1) {
+        board.at(0,0).setLink(p->getLink('a'));
+        board.at(0,1).setLink(p->getLink('b'));
+        board.at(0,2).setLink(p->getLink('c'));
+        board.at(0,5).setLink(p->getLink('f'));
+        board.at(0,6).setLink(p->getLink('g'));
+        board.at(0,7).setLink(p->getLink('h'));
+        board.at(1,3).setLink(p->getLink('d'));
+        board.at(1,4).setLink(p->getLink('e'));
+    } else {
+        board.at(7,0).setLink(p->getLink('A'));
+        board.at(7,1).setLink(p->getLink('B'));
+        board.at(7,2).setLink(p->getLink('C'));
+        board.at(7,5).setLink(p->getLink('F'));
+        board.at(7,6).setLink(p->getLink('G'));
+        board.at(7,7).setLink(p->getLink('H'));
+        board.at(6,3).setLink(p->getLink('D'));
+        board.at(6,4).setLink(p->getLink('E'));
+    }
+}
+
 void Game::startGame() {
     currentPlayerIdx = 0;
     gameOver = false;
 
     // Only do setup if no links have been placed yet
     if (players.size() < 2) return;
-    if (!players[0]->getLinks().empty() || !players[1]->getLinks().empty()) return;
-
-    // --- 1. Give each player 5 abilities ---
-    // (Replace this with however your Ability objects are created; 
-    // if you have an AbilityFactory, call that instead)
-    // for (auto *p : players) {
-    //     for (int i = 0; i < 5; ++i) {
-    //         // Placeholder: add nullptr if you don't have real Ability objects yet
-    //         p->addAbility(nullptr);
-    //     }
-    // }
-
-    // --- 2. Define link configuration ---
-    // Order: V1, D4, V3, V2, D3, V4, D2, D1
-    std::vector<std::pair<LinkType,int>> configs = {
-        {LinkType::Virus, 1}, {LinkType::Data, 4},
-        {LinkType::Virus, 3}, {LinkType::Virus, 2},
-        {LinkType::Data, 3}, {LinkType::Virus, 4},
-        {LinkType::Data, 2}, {LinkType::Data, 1}
-    };
-
-    auto makeLinks = [&](Player *p, bool upper) {
-        char id = upper ? 'A' : 'a';
-        for (auto &cfg : configs) {
-            Link *l = new Link(id, cfg.first, cfg.second, p);
-            p->addLink(l);
-            ++id;
-        }
-    };
-
-    makeLinks(players[0], false); // lowercase for P1
-    makeLinks(players[1], true);  // uppercase for P2
-
-    // --- 3. Place links on the board explicitly ---
-
-    auto placeLinks = [&](Player *p, bool isP1) {
-        // Explicit order for link IDs
-        std::vector<char> ids = isP1
-            ? std::vector<char>{'a','b','c','f','g','h','d','e'} // placement order
-            : std::vector<char>{'A','B','C','F','G','H','D','E'};
-
-        if (!isP1) {
-            // Player 2 (bottom)
-            // Row 7: columns 0,1,2 then skip 3,4 then 5,6,7
-            board.at(7,0).setLink(p->getLink('A'));
-            board.at(7,1).setLink(p->getLink('B'));
-            board.at(7,2).setLink(p->getLink('C'));
-            board.at(7,5).setLink(p->getLink('F'));
-            board.at(7,6).setLink(p->getLink('G'));
-            board.at(7,7).setLink(p->getLink('H'));
-            // Row 6: columns 3,4 (d,e)
-            board.at(6,3).setLink(p->getLink('D'));
-            board.at(6,4).setLink(p->getLink('E'));
-        } else {
-            // Player 1 (top)
-            // Row 0: columns 0,1,2 then skip 3,4 then 5,6,7
-            board.at(0,0).setLink(p->getLink('a'));
-            board.at(0,1).setLink(p->getLink('b'));
-            board.at(0,2).setLink(p->getLink('c'));
-            board.at(0,5).setLink(p->getLink('f'));
-            board.at(0,6).setLink(p->getLink('g'));
-            board.at(0,7).setLink(p->getLink('h'));
-            // Row 1: columns 3,4 (D,E)
-            board.at(1,3).setLink(p->getLink('d'));
-            board.at(1,4).setLink(p->getLink('e'));
-        }
-    };
-
-    placeLinks(players[0], true);
-    placeLinks(players[1], false);
+    // Place links already created for each player on the board
+    setupLinksForPlayer(players[0], true);
+    setupLinksForPlayer(players[1], false);
 }
 
 
