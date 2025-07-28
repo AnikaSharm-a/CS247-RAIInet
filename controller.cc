@@ -7,6 +7,11 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include <algorithm>
+#include <random>
+#include "abilityFactory.h"
+#include "linkType.h"
+
 
 Controller::Controller(View* view, Game* game)
     : view(view), game(game) {}
@@ -115,3 +120,83 @@ void Controller::play(std::istream &in) {
         // game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
     }
 }
+
+LinkType Controller::parseLinkType(const std::string& s) {
+    if (s.empty()) throw std::invalid_argument("Empty link type.");
+    if (s[0] == 'D') return LinkType::Data;
+    if (s[0] == 'V') return LinkType::Virus;
+    throw std::invalid_argument("Invalid link type: " + s);
+}
+
+int Controller::parseStrength(const std::string& s) {
+    if (s.length() < 2) throw std::invalid_argument("Link string too short.");
+    int strength = s[1] - '0';
+    if (strength < 1 || strength > 4) throw std::invalid_argument("Invalid strength: " + s);
+    return strength;
+}
+
+void Controller::loadLinksFromFile(const std::string& filename, Player* player, bool isPlayer1) {
+    std::ifstream in(filename);
+    if (!in) throw std::runtime_error("Failed to open link file: " + filename);
+
+    std::vector<std::string> tokens;
+    std::string s;
+    while (in >> s) {
+        tokens.push_back(s);
+    }
+
+    if (tokens.size() != 8) {
+        throw std::runtime_error("Expected 8 links in file: " + filename);
+    }
+
+    for (int i = 0; i < 8; ++i) {
+        LinkType type = parseLinkType(tokens[i]);
+        int strength = parseStrength(tokens[i]);
+        char id = isPlayer1 ? ('a' + i) : ('A' + i);
+        Link* link = new Link(id, type, strength, player);
+        player->addLink(link);
+    }
+}
+
+void Controller::generateDefaultLinks(Player* player, bool isPlayer1) {
+    std::vector<std::pair<LinkType,int>> configs = {
+        {LinkType::Virus, 1}, {LinkType::Data, 4},
+        {LinkType::Virus, 3}, {LinkType::Virus, 2},
+        {LinkType::Data, 3}, {LinkType::Virus, 4},
+        {LinkType::Data, 2}, {LinkType::Data, 1}
+    };
+
+    static std::random_device rd;
+    static std::mt19937 g(rd());
+    std::shuffle(configs.begin(), configs.end(), g);
+
+    char id = isPlayer1 ? 'a' : 'A';
+    for (const auto& cfg : configs) {
+        Link* link = new Link(id, cfg.first, cfg.second, player);
+        player->addLink(link);
+        ++id;
+    }
+}
+
+void Controller::setupPlayers(Player* p1, Player* p2,
+                              const std::string& ability1Str, const std::string& ability2Str,
+                              const std::string& link1File, const std::string& link2File) {
+    auto p1Abilities = AbilityFactory::createAbilities(ability1Str);
+    for (Ability* ability : p1Abilities) p1->addAbility(ability);
+
+    auto p2Abilities = AbilityFactory::createAbilities(ability2Str);
+    for (Ability* ability : p2Abilities) p2->addAbility(ability);
+
+    if (!link1File.empty()) {
+        loadLinksFromFile(link1File, p1, true);
+    } else {
+        generateDefaultLinks(p1, true);
+    }
+
+    if (!link2File.empty()) {
+        loadLinksFromFile(link2File, p2, false);
+    } else {
+        generateDefaultLinks(p2, false);
+    }
+}
+
