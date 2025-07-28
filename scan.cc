@@ -20,9 +20,16 @@ void Scan::use(Game* game,
         throw invalid_argument("Scan: no link at target cell");
 
     Link* link = cell.getLink();
-    if (link->getOwner() == player)
-        throw invalid_argument("Scan: cannot scan your own link");
-
-    // reveal the link so its type & strength become visible
-    link->reveal();
+    // Allow scanning any link on the field
+    // For own links, we can scan them but they won't be revealed
+    // For opponent links, reveal them
+    
+    if (link->getOwner() != player) {
+        // Reveal opponent links
+        link->reveal();
+    }
+    // For own links, do nothing (they remain unrevealed)
+    else{
+        throw invalid_argument("Scan: cannot scan own link");
+    }
 }

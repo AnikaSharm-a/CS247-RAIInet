@@ -191,6 +191,26 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
         }
         row = pos.first;
         col = pos.second;
+    } else if (abilityName == "Download" || abilityName == "Polarize" || abilityName == "Scan") {
+        if (args[0] == '\0') {
+            throw std::invalid_argument(abilityName + " requires a link ID");
+        }
+        char linkId = args[0];
+        // Find the link on the board (can be any player's link)
+        bool found = false;
+        for (int r = 0; r < 8 && !found; ++r) {
+            for (int c = 0; c < 8 && !found; ++c) {
+                auto* link = board.at(r, c).getLink();
+                if (link && link->getId() == linkId) {
+                    row = r;
+                    col = c;
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            throw std::invalid_argument("Link '" + std::string(1, linkId) + "' not found on the board");
+        }
     } else {
         std::string argsStr(args);
         size_t spacePos = argsStr.find(' ');
