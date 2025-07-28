@@ -25,6 +25,7 @@ public:
     void reveal() { revealed = true; }
     bool isBoosted() const { return boosted; }
     void boost() { boosted = true; }
+    void removeBoost() { boosted = false; }
 
     Link* battle(Link* opponent);
 };

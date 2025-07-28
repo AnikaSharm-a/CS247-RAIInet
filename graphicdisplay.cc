@@ -38,6 +38,11 @@ void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) 
         // Draw ID on top
         std::string idStr(1, link->getId());
         xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, idStr);
+        
+        // Draw boost indicator if link is boosted
+        if (link->isBoosted()) {
+            xw.drawString(x + 2*cellWidth/3, y + 2*cellHeight/3, "*");
+        }
     } else {
         if (cell.getType() == CellType::ServerPort) {
             xw.fillRectangle(x, y, cellWidth, cellHeight, Xwindow::Blue);

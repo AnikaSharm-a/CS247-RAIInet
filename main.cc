@@ -12,8 +12,9 @@
 #include "player.h"
 #include "link.h"
 
-// Run automated test with predefined commands
-#include "abilityFactory.h"  // Add this include
+#include "abilityFactory.h"
+
+using namespace std;
 
 int main(int argc, char* argv[]) {
     TextDisplay td(8);
@@ -25,19 +26,31 @@ int main(int argc, char* argv[]) {
     Player *p2 = new Player(2);
 
     // Default ability strings
-    std::string ability1Str = "LFDSP";
-    std::string ability2Str = "LFDSP";
-    std::string link1File = "";
-    std::string link2File = "";
+    string ability1Str = "LFDSP";
+    string ability2Str = "LFDSP";
+    string link1File = "";
+    string link2File = "";
     bool graphics = false;
 
     // Simple command line parsing
     for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
+        string arg = argv[i];
         if (arg == "-ability1" && i + 1 < argc) {
             ability1Str = argv[++i];
+            // Validate ability string immediately
+            if (!AbilityFactory::isValidAbilityString(ability1Str)) {
+                cerr << "Invalid ability string for player 1: " << ability1Str << "\n";
+                cerr << "\n" << AbilityFactory::getUsageInfo() << "\n";
+                return 1;
+            }
         } else if (arg == "-ability2" && i + 1 < argc) {
             ability2Str = argv[++i];
+            // Validate ability string immediately
+            if (!AbilityFactory::isValidAbilityString(ability2Str)) {
+                cerr << "Invalid ability string for player 2: " << ability2Str << "\n";
+                cerr << "\n" << AbilityFactory::getUsageInfo() << "\n";
+                return 1;
+            }
         } else if (arg == "-link1" && i + 1 < argc) {
             link1File = argv[++i];
         } else if (arg == "-link2" && i + 1 < argc) {
@@ -63,15 +76,16 @@ int main(int argc, char* argv[]) {
 
     try {
         controller.setupPlayers(p1, p2, ability1Str, ability2Str, link1File, link2File);
-    } catch (const std::exception& e) {
-        std::cerr << "Setup failed: " << e.what() << "\n";
+    } catch (const exception& e) {
+        cerr << "Setup failed: " << e.what() << "\n";
+        cerr << "\n" << AbilityFactory::getUsageInfo() << "\n";
         return 1;
     }
 
     game.startGame();
 
-    std::cout << "Welcome to RAIInet! Player 1 goes first.\n";
-    controller.play(std::cin);
+    cout << "Welcome to RAIInet! Player 1 goes first.\n";
+    controller.play(cin);
 
     delete p1;
     delete p2;

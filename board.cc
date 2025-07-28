@@ -55,7 +55,22 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         case Direction::Left: dc = -1; break;
         case Direction::Right: dc = 1; break;
     }
-    int nr = r + dr, nc = c + dc;
+    
+    Link* moving = grid[r][c].getLink();
+    if (!moving) {
+        outcome.success = false;
+        outcome.result = MoveResult::Invalid;
+        return outcome;
+    }
+    
+    // Determine movement distance based on whether link is boosted
+    int moveDistance = moving->isBoosted() ? 2 : 1;
+    
+    // Calculate destination coordinates
+    int nr = r + (dr * moveDistance);
+    int nc = c + (dc * moveDistance);
+    
+    // Check if the move would go out of bounds
     if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) {
         // Allow moving off the opponent's side (download)
         // Conditions:
@@ -66,8 +81,8 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             (player->getId() == 2 && nr < 0);
 
         if (offOpponentSide) {
-            outcome.movedLink = grid[r][c].getLink();
-            outcome.affectedLink = grid[r][c].getLink();
+            outcome.movedLink = moving;
+            outcome.affectedLink = moving;
             outcome.affectedLink->reveal();
             grid[r][c].removeLink(); // Remove from board
             outcome.success = true;
@@ -84,16 +99,30 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
     Cell& src = grid[r][c];
     Cell& dest = grid[nr][nc];
 
-    Link* moving = src.getLink();
-    if (!moving) {
-        outcome.success = false;
-        outcome.result = MoveResult::Invalid;
-        return outcome;
-    }
-
     outcome.movedLink = moving;
     outcome.destRow = nr;
     outcome.destCol = nc;
+
+    // If link is boosted and moving 2 squares, check if the intermediate cell is passable
+    if (moving->isBoosted() && moveDistance == 2) {
+        int midR = r + dr;
+        int midC = c + dc;
+        
+        // Check if intermediate cell is within bounds
+        if (midR >= 0 && midR < 8 && midC >= 0 && midC < 8) {
+            Cell& midCell = grid[midR][midC];
+            
+            // If intermediate cell has a link, the boosted link can jump over it
+            // If intermediate cell is a firewall, the boosted link can jump over it
+            // If intermediate cell is a server port, check if it's passable
+            if (midCell.getType() == CellType::ServerPort) {
+                // Cannot jump over server ports
+                outcome.success = false;
+                outcome.result = MoveResult::Invalid;
+                return outcome;
+            }
+        }
+    }
 
     if (!dest.isEmpty()) {
         if (dest.getLink()->getOwner() == player) {
@@ -113,11 +142,6 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             outcome.success = true;
             outcome.result = MoveResult::BattleWon;
             outcome.affectedLink = defender;
-
-            // std::cerr << "MoveResult = " << static_cast<int>(outcome.result)
-        //   << " affectedLink=" << (outcome.affectedLink ? outcome.affectedLink->getId() : '?')
-        //   << std::endl;
-        //   std::cout << "typeid(outcome.result).name() = " << typeid(outcome.result).name() << std::endl;
             return outcome;
         } else {
             // Defender wins, attacker is removed

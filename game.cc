@@ -105,20 +105,34 @@ bool Game::playerMove(char id, Direction dir) {
             break;
         case MoveResult::BattleWon:
             // Current player downloads opponent's link
-            // std::cout << "DEBUG: BattleWon -> incrementDownload for affectedLink = "
-            //   << outcome.affectedLink->getId() << std::endl;
+            // Remove boost effect from the downloaded link
+            if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
+                outcome.affectedLink->removeBoost();
+            }
             currentPlayer->incrementDownload(outcome.affectedLink);
             break;
         case MoveResult::BattleLost:
             // Opponent downloads current player's link
+            // Remove boost effect from the downloaded link
+            if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
+                outcome.affectedLink->removeBoost();
+            }
             opponent->incrementDownload(outcome.affectedLink);
             break;
         case MoveResult::DownloadedOffBoard:
             // Current player downloads their own link escaped off board
+            // Remove boost effect from the downloaded link
+            if (outcome.movedLink && outcome.movedLink->isBoosted()) {
+                outcome.movedLink->removeBoost();
+            }
             currentPlayer->incrementDownload(outcome.movedLink);
             break;
         case MoveResult::DownloadedOnServerPort:
             // Opponent downloads current player's link that moved onto their server port
+            // Remove boost effect from the downloaded link
+            if (outcome.movedLink && outcome.movedLink->isBoosted()) {
+                outcome.movedLink->removeBoost();
+            }
             opponent->incrementDownload(outcome.movedLink);
             break;
         case MoveResult::Invalid:
