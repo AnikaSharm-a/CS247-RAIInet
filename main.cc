@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
             graphics = true;
         } else {
             std::cerr << "Unknown or invalid argument: " << arg << "\n";
+            return 1;
         }
     }
 
