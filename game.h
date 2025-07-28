@@ -28,6 +28,7 @@ public:
     int getCurrentPlayerIdx() const;
     bool isGameOver() const;
     Controller* getController();
+    void setupLinksForPlayer(Player* p, bool isPlayer1);
 
     bool playerMove(char linkId, Direction dir);
     Player* getOpponentPlayer();
