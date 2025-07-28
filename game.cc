@@ -135,6 +135,20 @@ bool Game::playerMove(char id, Direction dir) {
             }
             opponent->incrementDownload(outcome.movedLink);
             break;
+        case MoveResult::DownloadedByFirewall:
+            // Virus link was downloaded by firewall effect
+            // Remove boost effect from the downloaded link
+            if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
+                outcome.affectedLink->removeBoost();
+            }
+            // The virus owner downloads their own virus
+            if (outcome.affectedLink) {
+                Player* virusOwner = outcome.affectedLink->getOwner();
+                if (virusOwner) {
+                    virusOwner->incrementDownload(outcome.affectedLink);
+                }
+            }
+            break;
         case MoveResult::Invalid:
             break;
     }

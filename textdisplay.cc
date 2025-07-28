@@ -92,7 +92,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
                 if (cell.getType() == CellType::ServerPort) {
                     out << "S";
                 } else if (cell.getType() == CellType::Firewall) {
-                    out << (cell.getOwnerId() == 0 ? 'm' : 'w');
+                    out << (cell.getOwnerId() == 1 ? 'm' : 'w');
                 } else {
                     out << ".";
                 }

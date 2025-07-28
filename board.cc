@@ -103,23 +103,28 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
     outcome.destRow = nr;
     outcome.destCol = nc;
 
-    // If link is boosted and moving 2 squares, check if the intermediate cell is passable
-    if (moving->isBoosted() && moveDistance == 2) {
-        int midR = r + dr;
-        int midC = c + dc;
-        
-        // Check if intermediate cell is within bounds
-        if (midR >= 0 && midR < 8 && midC >= 0 && midC < 8) {
-            Cell& midCell = grid[midR][midC];
+    // Check if destination has a firewall and apply firewall effects
+    if (dest.getType() == CellType::Firewall) {
+        // If the moving link is owned by the firewall owner, no effect
+        if (dest.getOwnerId() == player->getId()) {
+            // No firewall effect for owner's links
+        } else {
+            // Reveal the opponent link
+            moving->reveal();
             
-            // If intermediate cell has a link, the boosted link can jump over it
-            // If intermediate cell is a firewall, the boosted link can jump over it
-            // If intermediate cell is a server port, check if it's passable
-            if (midCell.getType() == CellType::ServerPort) {
-                // Cannot jump over server ports
-                outcome.success = false;
-                outcome.result = MoveResult::Invalid;
-                return outcome;
+            // If it's a virus, download it immediately
+            if (moving->getType() == LinkType::Virus) {
+                // Find the virus owner and download it
+                Player* virusOwner = moving->getOwner();
+                if (virusOwner) {
+                    // Remove the link from the board
+                    src.removeLink();
+                    outcome.success = true;
+                    outcome.result = MoveResult::DownloadedByFirewall;
+                    outcome.affectedLink = moving;
+                    outcome.movedLink = moving;
+                    return outcome;
+                }
             }
         }
     }
@@ -132,6 +137,29 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         }
 
         Link* defender = dest.getLink();
+        
+        // Check if defender is on a firewall and apply firewall effects before battle
+        if (dest.getType() == CellType::Firewall) {
+            // If the attacker is owned by the firewall owner, no effect
+            if (dest.getOwnerId() == player->getId()) {
+                // No firewall effect for owner's links
+            } else {
+                // Reveal the attacker link
+                moving->reveal();
+                
+                // If attacker is a virus, download it immediately
+                if (moving->getType() == LinkType::Virus) {
+                    // Remove the attacker from the board
+                    src.removeLink();
+                    outcome.success = true;
+                    outcome.result = MoveResult::DownloadedByFirewall;
+                    outcome.affectedLink = moving;
+                    outcome.movedLink = moving;
+                    return outcome;
+                }
+            }
+        }
+        
         Link* winner = moving->battle(defender);
 
         if (winner == moving) {
@@ -179,23 +207,6 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         outcome.success = true;
         outcome.result = MoveResult::Moved;
         return outcome;
-    }
-}
-
-void Board::printBoard() {
-    for (int r = 0; r < 8; ++r) {
-        for (int c = 0; c < 8; ++c) {
-            if (grid[r][c].getLink()) {
-                std::cout << grid[r][c].getLink()->getId();
-            } else if (grid[r][c].getType() == CellType::ServerPort) {
-                std::cout << 'S';
-            } else if (grid[r][c].getType() == CellType::Firewall) {
-                std::cout << (grid[r][c].getOwnerId() == 0 ? 'm' : 'w');
-            } else {
-                std::cout << '.';
-            }
-        }
-        std::cout << "\n";
     }
 }
 
