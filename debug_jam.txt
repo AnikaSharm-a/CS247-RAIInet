@@ -1,0 +1,23 @@
+# Debug Jam Issue
+# Run with: ./raiinet -ability1 "LFDSPJ" -ability2 "LFDSPJ"
+
+board
+abilities
+
+# Debug: Check what links are where
+board
+
+# Try to jam opponent link A (should work)
+ability 1 A
+
+# Try to jam own link a (should fail)
+ability 1 a
+
+# Try to jam opponent link B (should work)
+ability 1 B
+
+# Try to jam own link b (should fail)
+ability 1 b
+
+# Check board state
+board

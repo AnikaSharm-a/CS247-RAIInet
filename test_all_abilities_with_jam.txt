@@ -1,0 +1,75 @@
+# Test All Abilities Including Jam
+# Run with: ./raiinet -ability1 "LFDSPJ" -ability2 "LFDSPJ"
+
+board
+abilities
+
+# Test 1: LinkBoost with link ID
+ability 1 a
+board
+
+# Test 2: Download with link ID
+ability 1 A
+board
+
+# Test 3: Scan with link ID (opponent link)
+ability 1 B
+board
+
+# Test 4: Scan with link ID (own link - should not reveal)
+ability 1 b
+board
+
+# Test 5: Polarize with link ID
+ability 1 C
+board
+
+# Test 6: Jam with link ID
+ability 1 D
+board
+
+# Test 7: Firewall (still uses coordinates)
+ability 2 3 4
+board
+
+# Test 8: Try to move jammed link (should fail)
+move D up
+
+# Test 9: Move boosted link
+move a up
+board
+
+# Test 10: Move through firewall
+move E down
+board
+
+# Test 11: Try invalid ability usage
+ability 1 X
+ability 1 a X
+ability 1 a  # Try to jam own link (should fail)
+ability 1
+
+# Test 12: Test all abilities in sequence
+ability 1 f
+board
+ability 1 G
+board
+ability 1 H
+board
+
+# Test 13: End turn to unjam links
+move b up
+board
+
+# Test 14: Now try to move previously jammed link
+move D up
+board
+
+# Test 15: Test jam interaction with other abilities
+ability 1 I
+board
+ability 1 I  # Try to scan jammed link
+board
+
+# Final board state
+board

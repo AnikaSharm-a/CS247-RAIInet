@@ -1,0 +1,30 @@
+# Test All Download Scenarios
+# Run with: ./raiinet -ability1 "LFDJJ" -ability2 "LFDJJ"
+
+board
+abilities
+
+# Test 1: Download ability
+ability 1 A
+board
+
+# Test 2: Battle download (move link to opponent's position)
+move a down
+board
+
+# Test 3: Move off opponent's side (download)
+move b down
+board
+
+# Test 4: Firewall download (add firewall and move virus through it)
+ability 2 3 4
+board
+move c down
+board
+
+# Test 5: Battle on firewall
+move d down
+board
+
+# Final board state
+board

@@ -1,0 +1,59 @@
+# Test Jam Functionality
+# Run with: ./raiinet -ability1 "LFDSPJ" -ability2 "LFDSPJ"
+
+board
+abilities
+
+# Test 1: Jam an opponent link
+ability 1 A
+board
+
+# Test 2: Try to move the jammed link (should fail)
+move A up
+
+# Test 3: Try to jam own link (should fail)
+ability 1 a
+
+# Test 4: Jam another opponent link
+ability 1 B
+board
+
+# Test 5: Try to move the second jammed link (should fail)
+move B down
+
+# Test 6: Move a non-jammed link (should work)
+move C right
+board
+
+# Test 7: End turn to unjam links
+move a up
+board
+
+# Test 8: Now try to move previously jammed links (should work)
+move A up
+board
+move B down
+board
+
+# Test 9: Jam a link and then try to use other abilities on it
+ability 1 C
+board
+ability 1 C  # Try to scan jammed link
+board
+
+# Test 10: Test jam with boosted links
+ability 1 D
+board
+ability 1 D  # Try to boost jammed link
+board
+
+# Test 11: Test jam with firewall
+ability 2 3 4
+board
+ability 1 E
+board
+move E down  # Should not be able to move through firewall due to jam
+board
+
+# Final board state
+board

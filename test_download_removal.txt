@@ -1,0 +1,26 @@
+# Test Download Ability Link Removal
+# Run with: ./raiinet -ability1 "LFDJJ" -ability2 "LFDJJ"
+
+board
+abilities
+
+# Download opponent link A
+ability 1 A
+board
+
+# Download opponent link B
+ability 1 B
+board
+
+# Download opponent link C
+ability 1 C
+board
+
+# Try to download own link (should fail)
+ability 1 a
+
+# Try to download non-existent link (should fail)
+ability 1 X
+
+# Check final board state
+board

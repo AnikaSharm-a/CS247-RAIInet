@@ -1,0 +1,16 @@
+# Test Jam Error Message
+# Run with: ./raiinet -ability1 "LFDJJ" -ability2 "LFDJJ"
+
+board
+abilities
+
+# Jam opponent link A
+ability 1 A
+board
+
+# Try to move jammed link (should show specific error)
+move A up
+
+# Try to move non-jammed link (should work)
+move B up
+board

@@ -1,0 +1,30 @@
+# Test Jam Fix - Turn-based Jam Duration
+# Run with: ./raiinet -ability1 "LFDSPJ" -ability2 "LFDSPJ"
+
+board
+abilities
+
+# Player 1's turn: Jam opponent link C
+ability 1 C
+board
+
+# Try to move jammed link (should fail)
+move C up
+
+# Move own link to end turn
+move a up
+board
+
+# Player 2's turn: Try to move jammed link C (should still fail)
+move C down
+
+# Move own link to end turn
+move A up
+board
+
+# Player 1's turn: Now link C should be unjammed
+move C up
+board
+
+# Final state
+board
