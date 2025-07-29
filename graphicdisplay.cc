@@ -157,9 +157,13 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
             bool isFogged = false;
             auto fogIt = foggedCells.find({r, c});
             if (fogIt != foggedCells.end()) {
-                int fogOwnerId = std::get<2>(fogIt->second);
-                if (fogOwnerId == 2) {
-                    isFogged = true;
+                // Check if any fog is owned by Player 2 (for consistent Player 1 perspective)
+                for (const auto& fog : fogIt->second.second) {
+                    int fogOwnerId = fog.second;
+                    if (fogOwnerId == 2) { // Only show Player 2's fog
+                        isFogged = true;
+                        break;
+                    }
                 }
             }
             

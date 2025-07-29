@@ -16,7 +16,8 @@ class Game {
     bool gameOver;
     Controller* controller;
     int turnNumber; // Track the current turn number
-    std::map<std::pair<int, int>, std::tuple<CellType, int, int>> foggedCells;
+    // Map from cell coordinates to pair of (originalType, vector of fog effects (appliedTurn, ownerId))
+    std::map<std::pair<int, int>, std::pair<CellType, std::vector<std::pair<int, int>>>> foggedCells;
 
 public:
     void startGame();
@@ -33,7 +34,7 @@ public:
     Controller* getController();
     void setupLinksForPlayer(Player* p, bool isPlayer1);
     int getCurrentTurn() const; // Get current turn number
-    const std::map<std::pair<int, int>, std::tuple<CellType, int, int>>& getFoggedCells() const;
+    const std::map<std::pair<int, int>, std::pair<CellType, std::vector<std::pair<int, int>>>>& getFoggedCells() const;
     void setTurnNumber(int t);
 
 

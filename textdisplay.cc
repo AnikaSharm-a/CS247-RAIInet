@@ -62,15 +62,22 @@ void TextDisplay::print(const Game &game, ostream &out) const {
 
             auto fogIt = fogged.find(coord);
             if (fogIt != fogged.end()) {
-                // Get fog owner from tuple: std::tuple<CellType, int, int>
-                int fogOwnerId = std::get<2>(fogIt->second);
+                // Check if current player owns ALL fog on this cell
+                bool ownsAllFog = true;
+                for (const auto& fog : fogIt->second.second) {
+                    int fogOwnerId = fog.second;
+                    if (fogOwnerId != current->getId()) {
+                        ownsAllFog = false;
+                        break;
+                    }
+                }
 
-                // Show '?' only if fog owner is NOT current player
-                if (fogOwnerId != current->getId()) {
+                // Show '?' if current player doesn't own ALL fog on this cell
+                if (!ownsAllFog) {
                     out << "?";
                     continue;  // skip to next cell
                 }
-                // else fallthrough to show normal content for fog owner
+                // else fallthrough to show normal content only if player owns all fog
             }
             if (!cell.isEmpty()) {
                 Link* link = cell.getLink();
