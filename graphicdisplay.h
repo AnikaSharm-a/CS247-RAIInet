@@ -4,6 +4,7 @@
 #include "view.h"
 #include "window.h"
 #include "cellType.h"
+#include "linkType.h"
 #include <vector>
 
 class GraphicDisplay : public View {
@@ -13,7 +14,13 @@ class GraphicDisplay : public View {
     int cellHeight;
 
     // Keep a snapshot of last drawn characters to allow partial redraw
-    std::vector<std::vector<char>> lastDrawn;
+    struct DrawnState {
+        char symbol;
+        bool boosted;
+        bool visible;
+        LinkType type; // optional: only meaningful if visible
+    };
+    std::vector<std::vector<DrawnState>> lastDrawn;
 
     // --- ADD THESE CACHES ---
     mutable std::string lastP1Info;
