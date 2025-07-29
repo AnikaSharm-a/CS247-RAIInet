@@ -15,6 +15,10 @@ class GraphicDisplay : public View {
     // Keep a snapshot of last drawn characters to allow partial redraw
     std::vector<std::vector<char>> lastDrawn;
 
+    // --- ADD THESE CACHES ---
+    mutable std::string lastP1Info;
+    mutable std::string lastP2Info;
+
     void drawCell(int r, int c, const class Cell &cell, const class Player *p1) const;
 
 public:
