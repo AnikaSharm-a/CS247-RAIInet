@@ -1,0 +1,34 @@
+# Test AreaScan Functionality
+# Run with: ./raiinet -ability1 "LFDSA" -ability2 "LFDSA"
+
+board
+abilities
+
+# Test 1: AreaScan around own link in center of board
+ability 1 d
+board
+
+# Test 2: AreaScan around own link near edge
+ability 1 a
+board
+
+# Test 3: AreaScan around own link in corner
+ability 1 b
+board
+
+# Test 4: AreaScan with no opponent links in area (should fail)
+ability 1 c
+board
+
+# Test 5: AreaScan with opponent link ID (should fail)
+ability 1 A
+
+# Test 6: AreaScan with non-existent link ID (should fail)
+ability 1 X
+
+# Test 7: Compare with regular Scan
+ability 1 A
+board
+
+# Final board state
+board

@@ -1,0 +1,67 @@
+# Test All Abilities Including AreaScan
+# Run with: ./raiinet -ability1 "LFDSA" -ability2 "LFDSA"
+
+board
+abilities
+
+# Test 1: LinkBoost with link ID
+ability 1 a
+board
+
+# Test 2: Download with link ID
+ability 1 A
+board
+
+# Test 3: Scan with link ID (opponent link)
+ability 1 B
+board
+
+# Test 4: AreaScan with link ID (should reveal multiple opponent links around own link)
+ability 1 d
+board
+
+# Test 5: Polarize with link ID
+ability 1 C
+board
+
+# Test 6: Jam with link ID
+ability 1 D
+board
+
+# Test 7: Firewall (still uses coordinates)
+ability 2 3 4
+board
+
+# Test 8: Try to move jammed link (should fail)
+move D up
+
+# Test 9: Move boosted link
+move a up
+board
+
+# Test 10: Move through firewall
+move E down
+board
+
+# Test 11: Try invalid ability usage
+ability 1 X
+ability 1 a X
+ability 1 a  # Try to jam own link (should fail)
+ability 1
+
+# Test 12: Test AreaScan edge cases
+ability 1 b  # Corner scan
+board
+ability 1 e  # Other area scan
+board
+
+# Test 13: End turn to unjam links
+move b up
+board
+
+# Test 14: Now try to move previously jammed link
+move D up
+board
+
+# Final board state
+board
