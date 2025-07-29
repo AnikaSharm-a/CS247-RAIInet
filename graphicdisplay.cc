@@ -11,7 +11,7 @@ GraphicDisplay::GraphicDisplay(int gridSize, int width, int height)
     : xw{width, height}, gridSize{gridSize} {
     cellWidth = width / gridSize;
     cellHeight = (height - 200) / gridSize; // 62.5 is the hardcoded value
-    lastDrawn.assign(gridSize, std::vector<char>(gridSize, ' '));
+    lastDrawn.assign(gridSize, std::vector<DrawnState>(gridSize, DrawnState{' ', false, false, LinkType::Data}));
 }
 
 // Helper: choose text color (white if background is dark)
@@ -24,7 +24,6 @@ int textColorForBackground(int bg) {
 
 void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) const {
     int x = c * cellWidth;
-    // Shift grid down by 100 pixels to leave space for text
     int offsetY = 100;
     int y = offsetY + r * cellHeight;
 
@@ -32,53 +31,50 @@ void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) 
     std::string text = "";
     int textColor = Xwindow::Black;
 
+    // --- 1. Base background: empty cell ---
+    xw.fillRectangle(x, y, cellWidth, cellHeight, Xwindow::White);
+
+    // --- 2. Draw special cell background (firewall/server) ---
+    if (cell.getType() == CellType::ServerPort) {
+        bgColor = Xwindow::Blue;
+        xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
+        textColor = textColorForBackground(bgColor);
+        xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, "S", textColor);
+    } 
+    else if (cell.getType() == CellType::Firewall) {
+        bgColor = Xwindow::Orange;
+        xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
+        textColor = textColorForBackground(bgColor);
+        char fwChar = (cell.getOwnerId() == 1) ? 'm' : 'w';
+        xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, std::string(1, fwChar), textColor);
+    }
+
+    // --- 3. If there is a link, draw it ON TOP of whatever background was drawn ---
     if (!cell.isEmpty()) {
         Link *link = cell.getLink();
         Player *owner = link->getOwner();
         bool visible = (owner == p1 || link->isRevealed());
 
-        // Set background color based on ownership and type
-        if (link->getType() == LinkType::Data && visible) bgColor = Xwindow::Green;
-        else if (link->getType() == LinkType::Virus && visible) bgColor = Xwindow::Red;
+        // Select background color just for the link’s "highlight"
+        if (visible && link->getType() == LinkType::Data) bgColor = Xwindow::Green;
+        else if (visible && link->getType() == LinkType::Virus) bgColor = Xwindow::Red;
         else bgColor = Xwindow::Black;
-        
-        // if (visible) {
-        //     bgColor = (link->getType() == LinkType::Data) ? Xwindow::Green : Xwindow::Red;
-            text = std::string(1, link->getId());
-        // } else {
-        //     // Hidden link
-        //     bgColor = Xwindow::Black;
-        //     text = "?";
-        // }
+        text = std::string(1, link->getId());
 
-        xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
+        // Draw a smaller rectangle (overlay) for the link, leaving a margin
+        int margin = 4;
+        xw.fillRectangle(x + margin, y + margin, cellWidth - 2*margin, cellHeight - 2*margin, bgColor);
 
-        // Choose text color so it’s visible
+        // Draw link text
         textColor = textColorForBackground(bgColor);
         xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, text, textColor);
 
-        // Draw boost indicator
         if (link->isBoosted()) {
             xw.drawString(x + 2*cellWidth/3, y + 2*cellHeight/3, "*", textColor);
         }
-    } else {
-        if (cell.getType() == CellType::ServerPort) {
-            bgColor = Xwindow::Blue;
-            xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
-            textColor = textColorForBackground(bgColor);
-            xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, "S", textColor);
-        } else if (cell.getType() == CellType::Firewall) {
-            bgColor = Xwindow::Orange;
-            xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
-            textColor = textColorForBackground(bgColor);
-            char fwChar = (cell.getOwnerId() == 1) ? 'm' : 'w';
-            xw.drawString(x + cellWidth/3, y + 2*cellHeight/3,
-                          std::string(1, fwChar), textColor);
-        } else {
-            xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
-        }
     }
 }
+
 
 void GraphicDisplay::print(const Game &game, std::ostream &out) const {
     const auto &board = *game.getBoard();
@@ -128,21 +124,36 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
         for (int c = 0; c < gridSize; ++c) {
             const Cell &cell = board.at(r, c);
 
-            char currentSymbol = '.';
+            DrawnState newState{' ', false, false, LinkType::Data};
+
             if (!cell.isEmpty()) {
                 Link *link = cell.getLink();
                 Player *owner = link->getOwner();
-                if (owner == p1 || link->isRevealed())
-                    currentSymbol = link->getId();
-                else
-                    currentSymbol = '?';
-            } else if (cell.getType() == CellType::ServerPort) currentSymbol = 'S';
-            else if (cell.getType() == CellType::Firewall) currentSymbol = 'F';
+                bool visible = (owner == p1 || link->isRevealed());
 
-            if (lastDrawn[r][c] != currentSymbol) {
-                const_cast<GraphicDisplay*>(this)->lastDrawn[r][c] = currentSymbol;
+                newState.visible = visible;
+                newState.boosted = link->isBoosted();
+                newState.type = link->getType();
+                newState.symbol = visible ? link->getId() : '?';
+            }
+            else if (cell.getType() == CellType::ServerPort) {
+                newState.symbol = 'S';
+            }
+            else if (cell.getType() == CellType::Firewall) {
+                newState.symbol = 'F';
+            }
+
+            // Only redraw if something changed
+            const DrawnState &oldState = lastDrawn[r][c];
+            if (oldState.symbol != newState.symbol ||
+                oldState.boosted != newState.boosted ||
+                oldState.visible != newState.visible ||
+                (newState.visible && oldState.type != newState.type)) {
+
+                const_cast<GraphicDisplay*>(this)->lastDrawn[r][c] = newState;
                 drawCell(r, c, cell, p1);
             }
+
         }
     }
 
