@@ -21,7 +21,8 @@ class GraphicDisplay : public View {
         bool boosted;
         bool visible;
         LinkType type; // only meaningful if visible
-        bool jammed;   // NEW: track jammed state
+        bool jammed;
+        bool fogged;
     };
 
     vector<vector<DrawnState>> lastDrawn;
