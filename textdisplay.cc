@@ -21,6 +21,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
     const auto& players = game.getPlayers(); // Make sure getPlayers() returns const ref for const Game
     const Player* p1 = players[0];
     const Player* p2 = players[1];
+    const Player* current = players[game.getCurrentPlayerIdx()];
 
 
     // Print Player 1 info
@@ -28,12 +29,23 @@ void TextDisplay::print(const Game &game, ostream &out) const {
     out << "Downloaded: " << p1->getDownloadedData() << "D, " << p1->getDownloadedVirus() << "V\n";
     out << "Abilities: " << p1->getNumUnusedAbilities() << "\n";
 
-    // Player 1 links: iterate map
+    // Show links for Player 1 depending on whether current player is Player 1
     for (const auto& pair : p1->getLinks()) {
         char id = pair.first;
         Link* link = pair.second;
-        string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
-        out << id << ": " << typeStr << link->getStrength() << " ";
+        if (current == p1) {
+            // Current player sees all own links fully
+            string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
+            out << id << ": " << typeStr << link->getStrength() << " ";
+        } else {
+            // Opponent view: show revealed or '?'
+            if (link->isRevealed()) {
+                string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
+                out << id << ": " << typeStr << link->getStrength() << " ";
+            } else {
+                out << id << ": ? ";
+            }
+        }
     }
     out << "\n";
 
@@ -41,10 +53,25 @@ void TextDisplay::print(const Game &game, ostream &out) const {
 
     // Board print (8x8)
     const auto& board = *game.getBoard();
+    const auto& fogged = game.getFoggedCells();
 
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
             const Cell& cell = board.at(r, c);
+            std::pair<int, int> coord = {r, c};
+
+            auto fogIt = fogged.find(coord);
+            if (fogIt != fogged.end()) {
+                // Get fog owner from tuple: std::tuple<CellType, int, int>
+                int fogOwnerId = std::get<2>(fogIt->second);
+
+                // Show '?' only if fog owner is NOT current player
+                if (fogOwnerId != current->getId()) {
+                    out << "?";
+                    continue;  // skip to next cell
+                }
+                // else fallthrough to show normal content for fog owner
+            }
             if (!cell.isEmpty()) {
                 Link* link = cell.getLink();
                 Player* owner = link->getOwner();
@@ -78,12 +105,19 @@ void TextDisplay::print(const Game &game, ostream &out) const {
 
     for (const auto& pair : p2->getLinks()) {
         char id = pair.first;
-        Link* link = pair.second;  
-        if (link->isRevealed()) {
+        Link* link = pair.second;
+        if (current == p2) {
+            // Current player sees own links fully
             string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
             out << id << ": " << typeStr << link->getStrength() << " ";
         } else {
-            out << id << ": ? ";
+            // Opponent sees revealed or '?'
+            if (link->isRevealed()) {
+                string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
+                out << id << ": " << typeStr << link->getStrength() << " ";
+            } else {
+                out << id << ": ? ";
+            }
         }
     }
     out << "\n";
