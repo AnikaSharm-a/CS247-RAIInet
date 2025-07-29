@@ -6,6 +6,7 @@
 #include "scan.h"
 #include "jam.h"
 #include "fog.h"
+#include "areascan.h"
 #include <iostream>
 #include <stdexcept>
 #include <map>
@@ -34,6 +35,9 @@ Ability* AbilityFactory::createAbility(char abilityCode) {
         case 'E':
         case 'e':
             return new Fog();
+        case 'A':
+        case 'a':
+            return new AreaScan();
         default:
             throw invalid_argument("Invalid ability code: " + string(1, abilityCode));
     }
@@ -106,7 +110,7 @@ bool AbilityFactory::isValidAbilityString(const string& abilityString) {
 }
 
 string AbilityFactory::getValidAbilityCodes() {
-    return "LFDSPJE"; // LinkBoost, Firewall, Download, Scan, Polarize, Jam
+    return "LFDSPJEA"; // LinkBoost, Firewall, Download, Scan, Polarize, Jam, 
 }
 
 string AbilityFactory::getAbilityName(char abilityCode) {
@@ -132,6 +136,9 @@ string AbilityFactory::getAbilityName(char abilityCode) {
         case 'E':
         case 'e':
             return "Fog";
+        case 'A':
+        case 'a':
+            return "AreaScan";
         default:
             return "Unknown";
     }
@@ -147,6 +154,6 @@ string AbilityFactory::getUsageInfo() {
            "- Must have exactly 5 abilities\n"
            "- Maximum 2 copies of each ability type\n"
            "- Valid codes: " + getValidAbilityCodes() + "\n"
-           "- L: LinkBoost, F: Firewall, D: Download, S: Scan, P: Polarize, J: Jam, G: Fog\n"
+           "- L: LinkBoost, F: Firewall, D: Download, S: Scan, P: Polarize, J: Jam, E: Fog, A: AreaScan\n"
            "- Examples: LFDSP (one of each), FFDDL (two firewalls, two downloads, one linkboost)";
 } 
