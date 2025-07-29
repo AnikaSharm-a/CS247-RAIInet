@@ -80,7 +80,6 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
         if (!success) {
             cout << "Invalid move" << endl;
         } else {
-            view->print(*game, cout);
             moved = true;
         }
     }
