@@ -34,6 +34,8 @@ public:
     void setupLinksForPlayer(Player* p, bool isPlayer1);
     int getCurrentTurn() const; // Get current turn number
     const std::map<std::pair<int, int>, std::tuple<CellType, int, int>>& getFoggedCells() const;
+    void setTurnNumber(int t);
+
 
     bool playerMove(char linkId, Direction dir);
     Player* getOpponentPlayer();
