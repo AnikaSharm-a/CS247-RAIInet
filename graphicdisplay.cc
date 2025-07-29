@@ -11,7 +11,7 @@ using namespace std;
 GraphicDisplay::GraphicDisplay(int gridSize, int width, int height) : xw{width, height}, gridSize{gridSize} {
     cellWidth = (width - 10) / gridSize;
     cellHeight = (height - 200) / gridSize; // 62.5 is the hardcoded value
-    lastDrawn.assign(gridSize, vector<DrawnState>(gridSize, DrawnState{' ', false, false, LinkType::Data, false}));
+    lastDrawn.assign(gridSize, vector<DrawnState>(gridSize, DrawnState{' ', false, false, LinkType::Data, false, false}));
 
     // Board setup    
     int offsetX = 10;
@@ -112,8 +112,6 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
     const Player *p1 = players[0];
     const Player *p2 = players[1];
     const auto &foggedCells = game.getFoggedCells();
-    const Player* current = players[game.getCurrentPlayerIdx()];
-
 
     int lineHeight = 15;
     int infoHeightTop = 70;
@@ -160,12 +158,12 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
             auto fogIt = foggedCells.find({r, c});
             if (fogIt != foggedCells.end()) {
                 int fogOwnerId = std::get<2>(fogIt->second);
-                if (fogOwnerId != current->getId()) {
+                if (fogOwnerId == 2) {
                     isFogged = true;
                 }
             }
             
-            DrawnState newState{' ', false, false, LinkType::Data};
+            DrawnState newState{' ', false, false, LinkType::Data, false, isFogged};
             if (isFogged) {
                 newState.symbol = '?';
             }
@@ -189,23 +187,24 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
 
             // Only redraw if something changed
             const DrawnState &oldState = lastDrawn[r][c];
-            if (isFogged || oldState.symbol != newState.symbol ||
+            if (oldState.symbol != newState.symbol ||
                 oldState.boosted != newState.boosted ||
                 oldState.visible != newState.visible ||
                 oldState.jammed  != newState.jammed  ||
+                oldState.fogged != newState.fogged ||
                 (newState.visible && oldState.type != newState.type)) {
 
                 const_cast<GraphicDisplay*>(this)->lastDrawn[r][c] = newState;
+                int x = c * cellWidth + 10;
+                int offsetY = 100;
+                int y = offsetY + r * cellHeight;
+                int fogColor = Xwindow::Grey;
+                
                 if (isFogged) {
-                    int x = c * cellWidth + 10;
-                    int offsetY = 100;
-                    int y = offsetY + r * cellHeight;
-                    int fogColor = Xwindow::Grey;
-                    int margin = 4;
-
                     xw.fillRectangle(x + margin, y + margin, cellWidth - 2*margin, cellHeight - 2*margin, fogColor);
                     xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, "?", Xwindow::Black);
                 } else {
+                    // xw.fillRectangle(x + margin, y + margin, cellWidth - 2*margin, cellHeight - 2*margin, Xwindow::White);
                     drawCell(r, c, cell, p1);
                 }
             }
