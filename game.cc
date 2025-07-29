@@ -13,6 +13,7 @@ const std::vector<Player*>& Game::getPlayers() const { return players; }
 int Game::getCurrentPlayerIdx() const { return currentPlayerIdx; }
 bool Game::isGameOver() const { return gameOver; }
 Controller* Game::getController() { return controller; }
+int Game::getCurrentTurn() const { return turnNumber; }
 
 void Game::setCurrentPlayerIdx(int idx) { currentPlayerIdx = idx; }
 void Game::setGameOver(bool over) { gameOver = over; }
@@ -43,6 +44,7 @@ void Game::setupLinksForPlayer(Player* p, bool isPlayer1) {
 void Game::startGame() {
     currentPlayerIdx = 0;
     gameOver = false;
+    turnNumber = 0; // Initialize turn number
 
     // Only do setup if no links have been placed yet
     if (players.size() < 2) return;
@@ -94,7 +96,11 @@ bool Game::playerMove(char id, Direction dir) {
     // std::cout << "Board::moveLink returning " << static_cast<int>(outcome.result) << std::endl;
 
     if (!outcome.success) {
-        std::cout << "Invalid move.\n";
+        if (outcome.result == MoveResult::Jammed) {
+            std::cout << "Link '" << id << "' is jammed.\n";
+        } else {
+            std::cout << "Invalid move.\n";
+        }
         return false;
     }
 
@@ -157,7 +163,17 @@ bool Game::playerMove(char id, Direction dir) {
 
     // Advance turn if game is not over
     if (!gameOver) {
+        // Unjam links that were jammed two turns ago (after opponent's turn)
+        for (auto* p : players) {
+            for (auto& entry : p->getLinks()) {
+                Link* link = entry.second;
+                if (link->isJammed() && link->getJammedOnTurn() <= turnNumber - 2) {
+                    link->unjam();
+                }
+            }
+        }
         currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+        turnNumber++; // Increment turn number
     }
 
     return true;
@@ -191,7 +207,7 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
         }
         row = pos.first;
         col = pos.second;
-    } else if (abilityName == "Download" || abilityName == "Polarize" || abilityName == "Scan") {
+    } else if (abilityName == "Download" || abilityName == "Polarize" || abilityName == "Scan" || abilityName == "Jam") {
         if (args[0] == '\0') {
             throw std::invalid_argument(abilityName + " requires a link ID");
         }

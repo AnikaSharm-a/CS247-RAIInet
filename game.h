@@ -14,6 +14,7 @@ class Game {
     int currentPlayerIdx;
     bool gameOver;
     Controller* controller;
+    int turnNumber; // Track the current turn number
 
 public:
     void startGame();
@@ -29,6 +30,7 @@ public:
     bool isGameOver() const;
     Controller* getController();
     void setupLinksForPlayer(Player* p, bool isPlayer1);
+    int getCurrentTurn() const; // Get current turn number
 
     bool playerMove(char linkId, Direction dir);
     Player* getOpponentPlayer();

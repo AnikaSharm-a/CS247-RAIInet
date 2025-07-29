@@ -63,6 +63,13 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         return outcome;
     }
     
+    // Check if the link is jammed
+    if (moving->isJammed()) {
+        outcome.success = false;
+        outcome.result = MoveResult::Jammed;
+        return outcome;
+    }
+    
     // Determine movement distance based on whether link is boosted
     int moveDistance = moving->isBoosted() ? 2 : 1;
     

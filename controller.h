@@ -15,7 +15,7 @@ class Controller {
     Game* game;
 
     // Returns false if quit or game over
-    bool parseCommand(const std::string &cmd, std::istream &in);
+    bool parseCommand(const std::string &cmd, std::istream &in, Player* currentPlayer, bool &moved, bool &abilityUsed);
     static LinkType parseLinkType(const std::string& s);
     static int parseStrength(const std::string& s);
     void loadLinksFromFile(const std::string& filename, Player* player, bool isPlayer1);

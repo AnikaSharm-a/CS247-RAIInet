@@ -4,6 +4,7 @@
 #include "linkboost.h"
 #include "polarize.h"
 #include "scan.h"
+#include "jam.h"
 #include <iostream>
 #include <stdexcept>
 #include <map>
@@ -25,6 +26,9 @@ Ability* AbilityFactory::createAbility(char abilityCode) {
         case 'P':
         case 'p':
             return new Polarize();
+        case 'J':
+        case 'j':
+            return new Jam();
         default:
             throw std::invalid_argument("Invalid ability code: " + std::string(1, abilityCode));
     }
@@ -97,7 +101,7 @@ bool AbilityFactory::isValidAbilityString(const std::string& abilityString) {
 }
 
 std::string AbilityFactory::getValidAbilityCodes() {
-    return "LFDSP"; // LinkBoost, Firewall, Download, Scan, Polarize
+    return "LFDSPJ"; // LinkBoost, Firewall, Download, Scan, Polarize, Jam
 }
 
 std::string AbilityFactory::getAbilityName(char abilityCode) {
@@ -117,6 +121,9 @@ std::string AbilityFactory::getAbilityName(char abilityCode) {
         case 'P':
         case 'p':
             return "Polarize";
+        case 'J':
+        case 'j':
+            return "Jam";
         default:
             return "Unknown";
     }
@@ -132,6 +139,6 @@ std::string AbilityFactory::getUsageInfo() {
            "- Must have exactly 5 abilities\n"
            "- Maximum 2 copies of each ability type\n"
            "- Valid codes: " + getValidAbilityCodes() + "\n"
-           "- L: LinkBoost, F: Firewall, D: Download, S: Scan, P: Polarize\n"
+           "- L: LinkBoost, F: Firewall, D: Download, S: Scan, P: Polarize, J: Jam\n"
            "- Examples: LFDSP (one of each), FFDDL (two firewalls, two downloads, one linkboost)";
 } 
