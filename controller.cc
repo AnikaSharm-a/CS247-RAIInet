@@ -17,6 +17,100 @@ using namespace std;
 Controller::Controller(View* view, Game* game)
     : view(view), game(game) {}
 
+bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPlayer, bool &moved, bool &abilityUsed) {
+    if (cmd == "quit") {
+        return false;
+    }
+
+    else if (cmd == "board") {
+        view->print(*game, cout);
+    }
+
+    else if (cmd == "abilities") {
+        cout << "~~~~~~~~~~~~~" << endl;
+        currentPlayer->displayAbilities();
+        cout << "~~~~~~~~~~~~~" << endl;
+    }
+
+    else if (cmd == "ability") {
+        if (abilityUsed) {
+            cout << "You have already used an ability this turn." << endl;
+            return true;
+        }
+
+        int abilityId;
+        in >> abilityId;
+
+        string argsLine;
+        getline(in, argsLine);
+        size_t start = argsLine.find_first_not_of(" \t");
+        if (start != string::npos) {
+            argsLine = argsLine.substr(start);
+        } else {
+            argsLine.clear();
+        }
+
+        char args[64] = {0};
+        strncpy(args, argsLine.c_str(), sizeof(args) - 1);
+
+        try {
+            game->useAbility(currentPlayer, abilityId, args);
+            abilityUsed = true;
+            view->print(*game, cout);
+        } catch (const exception& e) {
+            cout << "Ability failed: " << e.what() << endl;
+        }
+    }
+
+    else if (cmd == "move") {
+        char id; string dirStr;
+        in >> id >> dirStr;
+
+        Direction dir;
+        if      (dirStr == "up") dir = Direction::Up;
+        else if (dirStr == "down") dir = Direction::Down;
+        else if (dirStr == "left") dir = Direction::Left;
+        else if (dirStr == "right") dir = Direction::Right;
+        else {
+            cout << "Invalid direction" << endl;
+            return true;
+        }
+
+        bool success = game->playerMove(id, dir);
+        if (!success) {
+            cout << "Invalid move" << endl;
+        } else {
+            view->print(*game, cout);
+            moved = true;
+        }
+    }
+
+    else if (cmd == "sequence") {
+        std::string filename;
+        in >> filename;
+        std::ifstream fileIn(filename);
+        if (!fileIn) {
+            std::cout << "Could not open sequence file\n";
+        } else {
+            bool cont = true;
+            while (cont) {
+                std::string nextCmd;
+                if (!(fileIn >> nextCmd)) break;  // No more commands in file
+                cont = parseCommand(nextCmd, fileIn, currentPlayer, moved, abilityUsed);
+                if (!cont) return false;  // Propagate quit upwards
+            }
+        }
+        return true;
+    }
+
+    else {
+        cout << "Unknown command" << endl;
+    }
+
+    return true;
+}
+
+
 void Controller::play(istream &in) {
     // Loop until the game ends
     while (!game->checkVictory() && in) {
@@ -31,86 +125,8 @@ void Controller::play(istream &in) {
             string cmd;
             if (!(in >> cmd)) break; // end of file or stream
 
-            if (cmd == "quit") return;
-
-            if (cmd == "board") {
-                // Show the board from the current player's perspective
-                view->print(*game, cout);
-            }
-
-            else if (cmd == "abilities") {
-                cout << "~~~~~~~~~~~~~"<<endl;
-                currentPlayer->displayAbilities();
-                cout << "~~~~~~~~~~~~~"<<endl;
-            }
-
-            else if (cmd == "ability") {
-                if (abilityUsed) {
-                    cout << "You have already used an ability this turn."<<endl;
-                    continue;
-                }
-                int abilityId;
-                in >> abilityId;
-
-                // Parse extra arguments (could be a link ID or coords)
-                string argsLine;
-                getline(in, argsLine);
-                size_t start = argsLine.find_first_not_of(" \t");
-                if (start != string::npos) {
-                    argsLine = argsLine.substr(start);
-                } else {
-                    argsLine.clear();
-                }
-
-                char args[64] = {0};
-                strncpy(args, argsLine.c_str(), sizeof(args) - 1);
-
-                try {
-                    game->useAbility(currentPlayer, abilityId, args);
-                    abilityUsed = true;
-                    view->print(*game, cout);
-                } catch (const exception& e) {
-                    cout << "Ability failed: " << e.what() << endl;
-                }
-            }
-
-            else if (cmd == "move") {
-                char id; string dirStr;
-                in >> id >> dirStr;
-
-                Direction dir;
-                if      (dirStr == "up") dir = Direction::Up;
-                else if (dirStr == "down") dir = Direction::Down;
-                else if (dirStr == "left") dir = Direction::Left;
-                else if (dirStr == "right") dir = Direction::Right;
-                else {
-                    cout << "Invalid direction"<<endl;
-                    continue;
-                }
-
-                // bool success = game->getBoard()->moveLink(id, currentPlayer, dir).success;
-                bool success = game->playerMove(id, dir);
-                if (!success) {
-                    cout << "Invalid move\n";
-                } else {
-                    view->print(*game, cout);
-                    moved = true; // turn ends after a successful move
-                }
-            }
-
-            else if (cmd == "sequence") {
-                string filename;
-                in >> filename;
-                ifstream fileIn(filename);
-                if (!fileIn) {
-                    cout << "Could not open sequence file"<<endl;
-                } else {
-                    play(fileIn); // process commands from file recursively
-                }
-            }
-
-            else {
-                cout << "Unknown command"<<endl;
+            if (!parseCommand(cmd, in, currentPlayer, moved, abilityUsed)) {
+                return; // quit or EOF
             }
         }
 
