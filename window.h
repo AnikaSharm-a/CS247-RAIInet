@@ -3,6 +3,7 @@
 #include <X11/Xlib.h>
 #include <iostream>
 #include <string>
+using namespace std;
 
 class Xwindow {
   Display *d;
@@ -24,8 +25,8 @@ class Xwindow {
   void fillRectangle(int x, int y, int width, int height, int colour=Black);
 
   // Draws a string
-  void drawString(int x, int y, std::string msg);
-  void drawString(int x, int y, std::string msg, int colour);
+  void drawString(int x, int y, string msg);
+  void drawString(int x, int y, string msg, int colour);
 
 };
 

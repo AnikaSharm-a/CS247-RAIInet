@@ -16,34 +16,6 @@ TextDisplay::TextDisplay(int gridSize) {
     theDisplay[7][4] = 'S';
 }
 
-// void TextDisplay::notify(int row, int col, char symbol) {
-//     theDisplay[row][col] = symbol;
-// }
-
-static void printPlayerInfo(ostream &out, Player *p, bool showLinks) {
-    out << "Player " << p->getId() << ":\n";
-    out << "Downloaded: " << p->getDownloadedData()
-        << "D, " << p->getDownloadedVirus() << "V\n";
-    out << "Abilities: " << p->getUnusedAbilityCount() << "\n";
-
-    int count = 0;
-    for (auto &entry : p->getLinks()) {
-        char id = entry.first;
-        Link *link = entry.second;
-        out << id << ": ";
-        if (showLinks || link->isRevealed()) {
-            out << (link->getType() == LinkType::Data ? 'D' : 'V') << link->getStrength();
-        } else {
-            out << "?";
-        }
-
-        ++count;
-        if (count % 4 == 0) out << "\n";
-        else out << " ";
-    }
-    if (count % 4 != 0) out << "\n";
-}
-
 void TextDisplay::print(const Game &game, ostream &out) const {
     // Access players const-correctly
     const auto& players = game.getPlayers(); // Make sure getPlayers() returns const ref for const Game
@@ -80,12 +52,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
                 if (owner == p1) {
                     out << link->getId();
                 } else {
-                    // Opponent links: show revealed or '?'
-                    // if (link->isRevealed()) {
-                        out << link->getId();
-                    // } else {
-                    //  out << "?";
-                    // }
+                    out << link->getId();
                 }
             } else {
                 // Print Server Ports as 'S', otherwise '.'

@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+using namespace std;
 
 class AbilityFactory {
 public:
@@ -12,22 +13,22 @@ public:
     static Ability* createAbility(char abilityCode);
     
     // Create a set of abilities from a string of codes (e.g., "LFDSP")
-    static std::vector<Ability*> createAbilities(const std::string& abilityString);
+    static vector<Ability*> createAbilities(const string& abilityString);
     
     // Get the default ability set (LinkBoost, Firewall, Download, Scan, Polarize)
-    static std::vector<Ability*> getDefaultAbilities();
+    static vector<Ability*> getDefaultAbilities();
     
     // Validate an ability string
-    static bool isValidAbilityString(const std::string& abilityString);
+    static bool isValidAbilityString(const string& abilityString);
     
     // Get all valid ability codes
-    static std::string getValidAbilityCodes();
+    static string getValidAbilityCodes();
     
     // Get ability name from code
-    static std::string getAbilityName(char abilityCode);
+    static string getAbilityName(char abilityCode);
     
     // Get usage information and rules
-    static std::string getUsageInfo();
+    static string getUsageInfo();
 
 private:
     // Helper method to validate single ability code

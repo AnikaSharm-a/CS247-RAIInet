@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+using namespace std;
 
 class View;
 class Game;
@@ -15,18 +16,18 @@ class Controller {
     Game* game;
 
     // Returns false if quit or game over
-    bool parseCommand(const std::string &cmd, std::istream &in, Player* currentPlayer, bool &moved, bool &abilityUsed);
-    static LinkType parseLinkType(const std::string& s);
-    static int parseStrength(const std::string& s);
-    void loadLinksFromFile(const std::string& filename, Player* player, bool isPlayer1);
+    bool parseCommand(const string &cmd, istream &in, Player* currentPlayer, bool &moved, bool &abilityUsed);
+    static LinkType parseLinkType(const string& s);
+    static int parseStrength(const string& s);
+    void loadLinksFromFile(const string& filename, Player* player, bool isPlayer1);
     void generateDefaultLinks(Player* player, bool isPlayer1);
 
 public:
     Controller(View* view, Game* game);
-    void play(std::istream &in);
+    void play(istream &in);
     void setupPlayers(Player* p1, Player* p2, 
-                      const std::string& ability1Str, const std::string& ability2Str,
-                      const std::string& link1File, const std::string& link2File);
+                      const string& ability1Str, const string& ability2Str,
+                      const string& link1File, const string& link2File);
 };
 
 #endif

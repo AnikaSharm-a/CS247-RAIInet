@@ -4,12 +4,13 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+using namespace std;
 
 // Accessors and mutators
 Board* Game::getBoard() { return &board; }
 const Board* Game::getBoard() const { return &board; }
-std::vector<Player*>& Game::getPlayers() { return players; }
-const std::vector<Player*>& Game::getPlayers() const { return players; }
+vector<Player*>& Game::getPlayers() { return players; }
+const vector<Player*>& Game::getPlayers() const { return players; }
 int Game::getCurrentPlayerIdx() const { return currentPlayerIdx; }
 bool Game::isGameOver() const { return gameOver; }
 Controller* Game::getController() { return controller; }
@@ -57,7 +58,7 @@ void Game::startGame() {
 bool Game::checkVictory() {
     for (auto p : players) {
         if (p->hasWon()) {
-            std::cout << "Player " << p->getId() << " wins by downloading 4 data!\n";
+            cout << "Player " << p->getId() << " wins by downloading 4 data!\n";
             gameOver = true;
             return true;
         }
@@ -65,8 +66,8 @@ bool Game::checkVictory() {
             // Find the opponent (assuming 2 players)
             int loserId = p->getId();
             int winnerId = (loserId == 1) ? 2 : 1;
-            std::cout << "Player " << loserId << " loses by downloading 4 viruses!\n";
-            std::cout << "Player " << winnerId << " wins!\n";
+            cout << "Player " << loserId << " loses by downloading 4 viruses!\n";
+            cout << "Player " << winnerId << " wins!\n";
             gameOver = true;
             return true;
         }
@@ -93,13 +94,13 @@ bool Game::playerMove(char id, Direction dir) {
     // For now, assume this function exists as below and returns true if move succeeded.
     // You will need to implement it accordingly.
     auto outcome = board.moveLink(id, currentPlayer, dir);
-    // std::cout << "Board::moveLink returning " << static_cast<int>(outcome.result) << std::endl;
+    // cout << "Board::moveLink returning " << static_cast<int>(outcome.result) << endl;
 
     if (!outcome.success) {
         if (outcome.result == MoveResult::Jammed) {
-            std::cout << "Link '" << id << "' is jammed.\n";
+            cout << "Link '" << id << "' is jammed.\n";
         } else {
-            std::cout << "Invalid move.\n";
+            cout << "Invalid move.\n";
         }
         return false;
     }
@@ -181,35 +182,35 @@ bool Game::playerMove(char id, Direction dir) {
 
 void Game::useAbility(Player* player, int abilityId, char args[]) {
     if (abilityId < 1 || abilityId > player->getNumAbilities()) {
-        throw std::invalid_argument("Invalid ability ID");
+        throw invalid_argument("Invalid ability ID");
     }
 
     if (player->isAbilityUsed(abilityId)) {
-        throw std::invalid_argument("Ability has already been used");
+        throw invalid_argument("Ability has already been used");
     }
 
     Ability* ability = player->getAbility(abilityId);
     if (!ability) {
-        throw std::invalid_argument("Ability not found");
+        throw invalid_argument("Ability not found");
     }
 
-    std::string abilityName = ability->getName();
+    string abilityName = ability->getName();
     int row = -1, col = -1;
 
     if (abilityName == "LinkBoost") {
         if (args[0] == '\0') {
-            throw std::invalid_argument("LinkBoost requires a link ID");
+            throw invalid_argument("LinkBoost requires a link ID");
         }
         char linkId = args[0];
         auto pos = board.findLinkPosition(linkId, player);
         if (pos.first == -1) {
-            throw std::invalid_argument("Link not found or not owned by player");
+            throw invalid_argument("Link not found or not owned by player");
         }
         row = pos.first;
         col = pos.second;
     } else if (abilityName == "Download" || abilityName == "Polarize" || abilityName == "Scan" || abilityName == "Jam") {
         if (args[0] == '\0') {
-            throw std::invalid_argument(abilityName + " requires a link ID");
+            throw invalid_argument(abilityName + " requires a link ID");
         }
         char linkId = args[0];
         // Find the link on the board (can be any player's link)
@@ -225,36 +226,36 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
             }
         }
         if (!found) {
-            throw std::invalid_argument("Link '" + std::string(1, linkId) + "' not found on the board");
+            throw invalid_argument("Link '" + string(1, linkId) + "' not found on the board");
         }
     } else {
-        std::string argsStr(args);
+        string argsStr(args);
         size_t spacePos = argsStr.find(' ');
-        if (spacePos == std::string::npos) {
+        if (spacePos == string::npos) {
             spacePos = argsStr.find(',');
         }
 
-        if (spacePos == std::string::npos) {
-            throw std::invalid_argument("Invalid coordinates format. Use 'row col' or 'row,col'");
+        if (spacePos == string::npos) {
+            throw invalid_argument("Invalid coordinates format. Use 'row col' or 'row,col'");
         }
 
         try {
-            row = std::stoi(argsStr.substr(0, spacePos));
-            col = std::stoi(argsStr.substr(spacePos + 1));
-        } catch (const std::exception&) {
-            throw std::invalid_argument("Invalid coordinates");
+            row = stoi(argsStr.substr(0, spacePos));
+            col = stoi(argsStr.substr(spacePos + 1));
+        } catch (const exception&) {
+            throw invalid_argument("Invalid coordinates");
         }
 
         if (row < 0 || row >= 8 || col < 0 || col >= 8) {
-            throw std::invalid_argument("Coordinates out of bounds");
+            throw invalid_argument("Coordinates out of bounds");
         }
     }
 
     try {
         ability->use(this, player, row, col);
         player->markAbilityUsed(abilityId);
-        std::cout << "Used " << abilityName << " successfully.\n";
-    } catch (const std::exception& e) {
-        throw std::invalid_argument(std::string("Ability failed: ") + e.what());
+        cout << "Used " << abilityName << " successfully.\n";
+    } catch (const exception& e) {
+        throw invalid_argument(string("Ability failed: ") + e.what());
     }
 }

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <map>
+using namespace std;
 
 Ability* AbilityFactory::createAbility(char abilityCode) {
     switch (abilityCode) {
@@ -30,55 +31,55 @@ Ability* AbilityFactory::createAbility(char abilityCode) {
         case 'j':
             return new Jam();
         default:
-            throw std::invalid_argument("Invalid ability code: " + std::string(1, abilityCode));
+            throw invalid_argument("Invalid ability code: " + string(1, abilityCode));
     }
 }
 
-std::vector<Ability*> AbilityFactory::createAbilities(const std::string& abilityString) {
+vector<Ability*> AbilityFactory::createAbilities(const string& abilityString) {
     if (!isValidAbilityString(abilityString)) {
-        std::string errorMsg = "Invalid ability string: " + abilityString + ". ";
+        string errorMsg = "Invalid ability string: " + abilityString + ". ";
         
         if (abilityString.length() != 5) {
             errorMsg += "Must have exactly 5 abilities.";
         } else {
             // Count occurrences to provide specific feedback
-            std::map<char, int> abilityCounts;
+            map<char, int> abilityCounts;
             for (char code : abilityString) {
                 char upperCode = toupper(code);
                 if (!isValidAbilityCode(upperCode)) {
-                    errorMsg += "Invalid ability code: " + std::string(1, code) + ". ";
+                    errorMsg += "Invalid ability code: " + string(1, code) + ". ";
                     errorMsg += "Valid codes are: " + getValidAbilityCodes();
                     break;
                 }
                 abilityCounts[upperCode]++;
                 if (abilityCounts[upperCode] > 2) {
-                    errorMsg += "Cannot have more than 2 copies of ability: " + std::string(1, upperCode);
+                    errorMsg += "Cannot have more than 2 copies of ability: " + string(1, upperCode);
                     break;
                 }
             }
         }
         
-        throw std::invalid_argument(errorMsg);
+        throw invalid_argument(errorMsg);
     }
     
-    std::vector<Ability*> abilities;
+    vector<Ability*> abilities;
     for (char code : abilityString) {
         abilities.push_back(createAbility(code));
     }
     return abilities;
 }
 
-std::vector<Ability*> AbilityFactory::getDefaultAbilities() {
+vector<Ability*> AbilityFactory::getDefaultAbilities() {
     return createAbilities("LFDSP"); // LinkBoost, Firewall, Download, Scan, Polarize
 }
 
-bool AbilityFactory::isValidAbilityString(const std::string& abilityString) {
+bool AbilityFactory::isValidAbilityString(const string& abilityString) {
     if (abilityString.length() != 5) {
         return false;
     }
     
     // Count occurrences of each ability type
-    std::map<char, int> abilityCounts;
+    map<char, int> abilityCounts;
     
     for (char code : abilityString) {
         char upperCode = toupper(code);
@@ -100,11 +101,11 @@ bool AbilityFactory::isValidAbilityString(const std::string& abilityString) {
     return true;
 }
 
-std::string AbilityFactory::getValidAbilityCodes() {
+string AbilityFactory::getValidAbilityCodes() {
     return "LFDSPJ"; // LinkBoost, Firewall, Download, Scan, Polarize, Jam
 }
 
-std::string AbilityFactory::getAbilityName(char abilityCode) {
+string AbilityFactory::getAbilityName(char abilityCode) {
     switch (abilityCode) {
         case 'L':
         case 'l':
@@ -130,11 +131,11 @@ std::string AbilityFactory::getAbilityName(char abilityCode) {
 }
 
 bool AbilityFactory::isValidAbilityCode(char abilityCode) {
-    std::string validCodes = getValidAbilityCodes();
-    return validCodes.find(toupper(abilityCode)) != std::string::npos;
+    string validCodes = getValidAbilityCodes();
+    return validCodes.find(toupper(abilityCode)) != string::npos;
 }
 
-std::string AbilityFactory::getUsageInfo() {
+string AbilityFactory::getUsageInfo() {
     return "Ability Selection Rules:\n"
            "- Must have exactly 5 abilities\n"
            "- Maximum 2 copies of each ability type\n"

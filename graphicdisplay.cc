@@ -6,12 +6,13 @@
 #include "cell.h"
 #include <sstream>
 #include <algorithm>
+using namespace std;
 
 GraphicDisplay::GraphicDisplay(int gridSize, int width, int height)
     : xw{width, height}, gridSize{gridSize} {
     cellWidth = width / gridSize;
     cellHeight = (height - 200) / gridSize; // 62.5 is the hardcoded value
-    lastDrawn.assign(gridSize, std::vector<DrawnState>(gridSize, DrawnState{' ', false, false, LinkType::Data}));
+    lastDrawn.assign(gridSize, vector<DrawnState>(gridSize, DrawnState{' ', false, false, LinkType::Data}));
 }
 
 // Helper: choose text color (white if background is dark)
@@ -28,7 +29,7 @@ void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) 
     int y = offsetY + r * cellHeight;
 
     int bgColor = Xwindow::White;
-    std::string text = "";
+    string text = "";
     int textColor = Xwindow::Black;
 
     // --- 1. Base background: empty cell ---
@@ -46,7 +47,7 @@ void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) 
         xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
         textColor = textColorForBackground(bgColor);
         char fwChar = (cell.getOwnerId() == 1) ? 'm' : 'w';
-        xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, std::string(1, fwChar), textColor);
+        xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, string(1, fwChar), textColor);
     }
 
     // --- 3. If there is a link, draw it ON TOP of whatever background was drawn ---
@@ -59,7 +60,7 @@ void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) 
         if (visible && link->getType() == LinkType::Data) bgColor = Xwindow::Green;
         else if (visible && link->getType() == LinkType::Virus) bgColor = Xwindow::Red;
         else bgColor = Xwindow::Black;
-        text = std::string(1, link->getId());
+        text = string(1, link->getId());
 
         // Draw a smaller rectangle (overlay) for the link, leaving a margin
         int margin = 4;
@@ -76,7 +77,7 @@ void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) 
 }
 
 
-void GraphicDisplay::print(const Game &game, std::ostream &out) const {
+void GraphicDisplay::print(const Game &game, ostream &out) const {
     const auto &board = *game.getBoard();
     const auto &players = game.getPlayers();
     const Player *p1 = players[0];
@@ -87,7 +88,7 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
     int boardOffsetY = infoHeightTop;
 
     // ---------- 1. Build Player 1 info as a single string ----------
-    std::ostringstream p1Stream;
+    ostringstream p1Stream;
     p1Stream << "Player 1:\n";
     p1Stream << "Downloaded: " << p1->getDownloadedData()
              << "D, " << p1->getDownloadedVirus() << "V\n";
@@ -100,7 +101,7 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
                  << (link->getType() == LinkType::Data ? "D" : "V")
                  << link->getStrength() << " ";
     }
-    std::string newP1Info = p1Stream.str();
+    string newP1Info = p1Stream.str();
 
     // ---------- 2. Only redraw if info changed ----------
     if (newP1Info != lastP1Info) {
@@ -110,10 +111,10 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
         xw.fillRectangle(0, 0, gridSize * cellWidth, infoHeightTop, Xwindow::White);
 
         // Draw lines
-        std::istringstream iss(newP1Info);
-        std::string line;
+        istringstream iss(newP1Info);
+        string line;
         int y = 15;
-        while (std::getline(iss, line)) {
+        while (getline(iss, line)) {
             xw.drawString(10, y, line);
             y += lineHeight;
         }
@@ -158,7 +159,7 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
     }
 
     // ---------- 4. Build Player 2 info as a single string ----------
-    std::ostringstream p2Stream;
+    ostringstream p2Stream;
     p2Stream << "Player 2:\n";
     p2Stream << "Downloaded: " << p2->getDownloadedData()
              << "D, " << p2->getDownloadedVirus() << "V\n";
@@ -175,7 +176,7 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
             p2Stream << id << ": ? ";
         }
     }
-    std::string newP2Info = p2Stream.str();
+    string newP2Info = p2Stream.str();
 
     // ---------- 5. Redraw Player 2 info only if changed ----------
     int p2StartAreaY = boardOffsetY + gridSize * cellHeight + 30;
@@ -186,10 +187,10 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
         // Clear background
         xw.fillRectangle(0, p2StartAreaY, gridSize * cellWidth, p2AreaHeight, Xwindow::White);
 
-        std::istringstream iss2(newP2Info);
-        std::string line2;
+        istringstream iss2(newP2Info);
+        string line2;
         int y2 = p2StartAreaY + 15;
-        while (std::getline(iss2, line2)) {
+        while (getline(iss2, line2)) {
             xw.drawString(10, y2, line2);
             y2 += lineHeight;
         }

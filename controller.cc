@@ -86,15 +86,15 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
     }
 
     else if (cmd == "sequence") {
-        std::string filename;
+        string filename;
         in >> filename;
-        std::ifstream fileIn(filename);
+        ifstream fileIn(filename);
         if (!fileIn) {
-            std::cout << "Could not open sequence file\n";
+            cout << "Could not open sequence file\n";
         } else {
             bool cont = true;
             while (cont) {
-                std::string nextCmd;
+                string nextCmd;
                 if (!(fileIn >> nextCmd)) break;  // No more commands in file
                 cont = parseCommand(nextCmd, fileIn, currentPlayer, moved, abilityUsed);
                 if (!cont) return false;  // Propagate quit upwards

@@ -2,6 +2,7 @@
 #include "link.h"
 #include "ability.h"
 #include <iostream>
+using namespace std;
 
 Player::Player(int id) : id(id) {}
 
@@ -9,15 +10,15 @@ int Player::getId() const {
     return id;
 }
 
-std::map<char, Link*>& Player::getLinks() {
+map<char, Link*>& Player::getLinks() {
     return links;
 }
 
-const std::map<char, Link*>& Player::getLinks() const {
+const map<char, Link*>& Player::getLinks() const {
     return links;
 }
 
-std::set<int>& Player::getUsedAbilities() {
+set<int>& Player::getUsedAbilities() {
     return usedAbilities;
 }
 
@@ -36,7 +37,6 @@ int Player::getNumLinks() const {
 int Player::getStrengthSum() const {
     int total = 0;
     for (const auto& entry : links) {
-        auto id = entry.first;
         auto link  = entry.second;
         total += link->getStrength();
     }
@@ -60,10 +60,9 @@ bool Player::ownsLink(char id) const {
     return links.find(id) != links.end();
 }
 
-std::vector<Link*> Player::getAllLinks() const {
-    std::vector<Link*> all;
+vector<Link*> Player::getAllLinks() const {
+    vector<Link*> all;
     for (const auto& entry : links) {
-        auto id = entry.first;
         auto link = entry.second;
         all.push_back(link);
     }
@@ -93,10 +92,10 @@ int Player::getNumUnusedAbilities() const {
 void Player::incrementDownload(Link* link) {
     if (!link) return;
     if (link->getType() == LinkType::Data) { downloadedData++;
-    std::cout << "======debug print incrementing data" << endl;
+    cout << "======debug print incrementing data" << endl;
     }
     else { downloadedVirus++;
-    std::cout << "======debug print incrementing virus" << endl;
+    cout << "======debug print incrementing virus" << endl;
     }
 }
 
@@ -143,14 +142,14 @@ int Player::getNumAbilities() const {
 
 // Enhanced ability management methods
 void Player::displayAbilities() const {
-    std::cout << "Player " << id << " Abilities:\n";
+    cout << "Player " << id << " Abilities:\n";
     for (int i = 0; i < static_cast<int>(abilities.size()); ++i) {
         int abilityId = i + 1;
         if (!abilities[i]) {
             continue;
         }
-        std::string status = isAbilityUsed(abilityId) ? "[USED]" : "[AVAILABLE]";
-        std::cout << "  " << abilityId << ". " << abilities[i]->getName() << " " << status << "\n";
+        string status = isAbilityUsed(abilityId) ? "[USED]" : "[AVAILABLE]";
+        cout << "  " << abilityId << ". " << abilities[i]->getName() << " " << status << "\n";
     }
 }
 
@@ -162,8 +161,8 @@ int Player::getUnusedAbilityCount() const {
     return abilities.size() - usedAbilities.size();
 }
 
-std::vector<std::string> Player::getAbilityNames() const {
-    std::vector<std::string> names;
+vector<string> Player::getAbilityNames() const {
+    vector<string> names;
     for (const auto& ability : abilities) {
         names.push_back(ability->getName());
     }

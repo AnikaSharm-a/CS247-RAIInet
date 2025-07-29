@@ -6,6 +6,7 @@
 #include "cellType.h"
 #include "linkType.h"
 #include <vector>
+using namespace std;
 
 class GraphicDisplay : public View {
     mutable Xwindow xw;
@@ -20,11 +21,11 @@ class GraphicDisplay : public View {
         bool visible;
         LinkType type; // optional: only meaningful if visible
     };
-    std::vector<std::vector<DrawnState>> lastDrawn;
+    vector<vector<DrawnState>> lastDrawn;
 
     // --- ADD THESE CACHES ---
-    mutable std::string lastP1Info;
-    mutable std::string lastP2Info;
+    mutable string lastP1Info;
+    mutable string lastP2Info;
 
     void drawCell(int r, int c, const class Cell &cell, const class Player *p1) const;
 
@@ -34,7 +35,7 @@ public:
     // Unused in this approach, but left for completeness
     // void notify(int row, int col, CellType state) override;
 
-    void print(const Game &game, std::ostream &out) const override;
+    void print(const Game &game, ostream &out) const override;
 };
 
 #endif

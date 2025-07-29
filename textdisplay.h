@@ -2,11 +2,12 @@
 #include <vector>
 #include <ostream>
 #include "view.h"
+using namespace std;
 
 class Game; // forward declaration
 
 class TextDisplay : public View {
-    std::vector<std::vector<char>> theDisplay;
+    vector<vector<char>> theDisplay;
 
 public:
     TextDisplay(int gridSize);
@@ -15,5 +16,5 @@ public:
     // void notify(int row, int col, char symbol) override;
 
     // Prints the entire game state: both players + board
-    void print(const Game& game, std::ostream &out) const override;
+    void print(const Game& game, ostream &out) const override;
 };

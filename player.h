@@ -4,15 +4,16 @@
 #include <set>
 #include <string>
 #include "linkType.h"
+using namespace std;
 
 class Link;      // forward declare
 class Ability;   // forward declare
 
 class Player {
     int id;
-    std::map<char, Link*> links;
-    std::vector<Ability*> abilities;
-    std::set<int> usedAbilities;
+    map<char, Link*> links;
+    vector<Ability*> abilities;
+    set<int> usedAbilities;
     int downloadedVirus = 0;
     int downloadedData = 0;
 
@@ -21,9 +22,9 @@ public:
 
     // Getters
     int getId() const;
-    std::map<char, Link*>& getLinks();
-    const std::map<char, Link*>& getLinks() const;
-    std::set<int>& getUsedAbilities();
+    map<char, Link*>& getLinks();
+    const map<char, Link*>& getLinks() const;
+    set<int>& getUsedAbilities();
     int getDownloadedVirus() const;
     int getDownloadedData() const;
     int getNumLinks() const;
@@ -34,7 +35,7 @@ public:
     Link* getLink(char id) const;
     void removeLink(char id);
     bool ownsLink(char id) const;
-    std::vector<Link*> getAllLinks() const;
+    vector<Link*> getAllLinks() const;
 
     // Reveal
     void revealLink(char id);
@@ -64,6 +65,6 @@ public:
     void displayAbilities() const;
     bool hasUnusedAbilities() const;
     int getUnusedAbilityCount() const;
-    std::vector<std::string> getAbilityNames() const;
+    vector<string> getAbilityNames() const;
     void resetAbilities(); // For testing or new games
 };

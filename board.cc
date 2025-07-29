@@ -1,6 +1,7 @@
 #include "board.h"
 #include <stdexcept>
 #include <iostream>
+using namespace std;
 
 Board::Board() {
     // All cells default to Normal unless setup otherwise
@@ -17,15 +18,15 @@ Board::Board() {
     }
 }
 
-std::pair<int, int> Board::findLinkPosition(char id, Player* player) {
+pair<int, int> Board::findLinkPosition(char id, Player* player) {
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
             auto* link = grid[r][c].getLink();
             if (link && link->getId() == id) {
                 // Check ownership
                 if (link->getOwner() != player) {
-                    std::cout << "You cannot move link '" << id
-                              << " - it belongs to the other player." << std::endl;
+                    cout << "You cannot move link '" << id
+                              << " - it belongs to the other player." << endl;
                     return {-1, -1};
                 }
                 return {r, c};
@@ -33,8 +34,8 @@ std::pair<int, int> Board::findLinkPosition(char id, Player* player) {
         }
     }
 
-    std::cout << "Link '" << id << "' not found on the board, "
-                 "or it is not your link." << std::endl;
+    cout << "Link '" << id << "' not found on the board, "
+                 "or it is not your link." << endl;
     return {-1, -1};
 }
 
@@ -223,7 +224,7 @@ bool Board::isServerPort(int row, int col) const {
 
 void Board::addFirewall(int row, int col, Player* player) {
     if (row < 0 || row >= 8 || col < 0 || col >= 8) {
-        throw std::invalid_argument("Firewall position out of bounds");
+        throw invalid_argument("Firewall position out of bounds");
     }
     
     // Set the cell type to Firewall and store the player ID

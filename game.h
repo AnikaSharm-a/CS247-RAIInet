@@ -5,12 +5,13 @@
 #include "board.h"
 #include "player.h"
 // #include "controller.h"
+using namespace std;
 
 class Controller;  // forward declare
 
 class Game {
     Board board;
-    std::vector<Player*> players;
+    vector<Player*> players;
     int currentPlayerIdx;
     bool gameOver;
     Controller* controller;
@@ -24,8 +25,8 @@ public:
 
     Board* getBoard();
     const Board* getBoard() const;
-    std::vector<Player*>& getPlayers();
-    const std::vector<Player*>& getPlayers() const; 
+    vector<Player*>& getPlayers();
+    const vector<Player*>& getPlayers() const; 
     int getCurrentPlayerIdx() const;
     bool isGameOver() const;
     Controller* getController();

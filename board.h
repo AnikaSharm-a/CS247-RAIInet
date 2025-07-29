@@ -2,6 +2,7 @@
 #include "cell.h"
 #include "link.h"
 #include <vector>
+using namespace std;
 
 // Move result enums and struct
 enum class MoveResult {
@@ -35,7 +36,7 @@ public:
     Cell& at(int row, int col) { return grid[row][col]; }
     const Cell& at(int row, int col) const { return grid[row][col]; }
     MoveOutcome moveLink(char id, Player* player, Direction dir);
-    std::pair<int, int> findLinkPosition(char id, Player* player);
+    pair<int, int> findLinkPosition(char id, Player* player);
     
     // Methods needed for abilities
     bool isServerPort(int row, int col) const;

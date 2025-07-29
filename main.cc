@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
         } else if (arg == "-graphics") {
             graphics = true;
         } else {
-            std::cerr << "Unknown or invalid argument: " << arg << "\n";
+            cerr << "Unknown or invalid argument: " << arg << "\n";
             return 1;
         }
     }
