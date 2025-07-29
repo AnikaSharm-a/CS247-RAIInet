@@ -211,6 +211,17 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
         }
         row = pos.first;
         col = pos.second;
+    } else if (abilityName == "AreaScan") {
+        if (args[0] == '\0') {
+            throw invalid_argument("AreaScan requires a link ID");
+        }
+        char linkId = args[0];
+        auto pos = board.findLinkPosition(linkId, player);
+        if (pos.first == -1) {
+            throw invalid_argument("Link not found or not owned by player");
+        }
+        row = pos.first;
+        col = pos.second;
     } else if (abilityName == "Download" || abilityName == "Polarize" || abilityName == "Scan" || abilityName == "Jam") {
         if (args[0] == '\0') {
             throw invalid_argument(abilityName + " requires a link ID");
