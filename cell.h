@@ -18,4 +18,7 @@ public:
 
     void setLink(Link* l) { link = l; }
     void removeLink() { link = nullptr; }
+
+    void setType(CellType newType) { type = newType; }
+
 };

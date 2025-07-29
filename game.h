@@ -16,6 +16,7 @@ class Game {
     bool gameOver;
     Controller* controller;
     int turnNumber; // Track the current turn number
+    std::map<std::pair<int, int>, std::tuple<CellType, int, int>> foggedCells;
 
 public:
     void startGame();
@@ -32,6 +33,7 @@ public:
     Controller* getController();
     void setupLinksForPlayer(Player* p, bool isPlayer1);
     int getCurrentTurn() const; // Get current turn number
+    const std::map<std::pair<int, int>, std::tuple<CellType, int, int>>& getFoggedCells() const;
 
     bool playerMove(char linkId, Direction dir);
     Player* getOpponentPlayer();
@@ -40,6 +42,10 @@ public:
     void setCurrentPlayerIdx(int idx);
     void setGameOver(bool over);
     void setController(Controller* c);
+
+    void applyFogEffect(int row, int col, int ownerId);
+    void removeFogEffect();
+    void updateFog();
 };
 
 #endif // GAME_H
