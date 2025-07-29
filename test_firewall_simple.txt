@@ -1,0 +1,35 @@
+# Simple Firewall Test
+board
+abilities
+
+# Place a firewall
+ability 2 3 4
+board
+
+# Move opponent link through firewall (should reveal)
+move A down
+board
+move A down
+board
+
+# Move virus link through firewall (should reveal and download)
+move D down
+board
+move D down
+board
+
+# Move own link through own firewall (no effect)
+move a up
+board
+move a up
+board
+
+# Test battle on firewall
+move C right
+board
+move C right
+board
+move C up
+board
+
+board 

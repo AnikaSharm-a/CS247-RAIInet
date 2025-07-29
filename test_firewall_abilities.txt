@@ -1,0 +1,42 @@
+# Test Firewall with Different Ability Configurations
+# Run this with: ./raiinet -ability1 "FFDDL" -ability2 "FFDDL"
+
+board
+abilities
+
+# Test multiple firewalls
+ability 2 3 4
+board
+ability 2 4 4
+board
+ability 2 5 4
+board
+
+# Move through multiple firewalls
+move A down
+board
+move A down
+board
+move A down
+board
+
+# Test firewall with other abilities
+# Use LinkBoost on a link
+ability 1 E
+board
+
+# Move boosted link through firewall
+move E down
+board
+move E down
+board
+
+# Test Download ability on firewall
+ability 1 3 3
+board
+
+# Test Scan ability on firewall
+ability 1 4 3
+board
+
+board 

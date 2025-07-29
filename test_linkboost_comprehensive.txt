@@ -1,0 +1,26 @@
+# Test LinkBoost functionality
+board
+abilities
+
+# Use LinkBoost on link 'a'
+ability 1 a
+board
+
+# Move the boosted link 'a' up (should move 2 squares)
+move a up
+board
+
+# Move the boosted link 'a' right (should move 2 squares)
+move a right
+board
+
+# Move the boosted link 'a' down (should move 2 squares)
+move a down
+board
+
+# Move the boosted link 'a' left (should move 2 squares)
+move a left
+board
+
+# Test that boosted link can jump over firewalls and other links
+# (This would require setting up a specific board state) 

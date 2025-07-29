@@ -1,0 +1,130 @@
+# Test Firewall Functionality
+# This file tests the firewall ability implementation
+
+# Initial board state
+board
+abilities
+
+# Test 1: Place a firewall on an empty cell
+ability 2 3 4
+board
+
+# Test 2: Try to place firewall on server port (should fail)
+ability 2 0 3
+
+# Test 3: Try to place firewall on non-empty cell (should fail)
+ability 2 6 0
+
+# Test 4: Place another firewall
+ability 2 5 5
+board
+
+# Test 5: Move opponent link through firewall (should reveal and download if virus)
+# First, move a link to a position where it can move through the firewall
+move A down
+board
+
+# Move through the firewall (should reveal the link)
+move A down
+board
+
+# Test 6: Move data link through firewall (should only reveal, not download)
+move B down
+board
+move B down
+board
+
+# Test 7: Move own link through own firewall (should have no effect)
+move a up
+board
+move a up
+board
+
+# Test 8: Battle on firewall - move opponent link to attack link on firewall
+move C right
+board
+move C right
+board
+move C right
+board
+
+# Now try to battle the link on the firewall
+move C up
+board
+
+# Test 9: Test virus download through firewall
+# Move a virus link through the firewall
+move D down
+board
+move D down
+board
+
+# Test 10: Test firewall effect on boosted links
+# Use LinkBoost on a link
+ability 1 E
+board
+
+# Move boosted link through firewall
+move E down
+board
+move E down
+board
+
+# Test 11: Test multiple firewalls
+# Place another firewall
+ability 2 4 2
+board
+
+# Move through multiple firewalls
+move F down
+board
+move F down
+board
+move F right
+board
+move F right
+board
+
+# Test 12: Test firewall on edge cases
+# Place firewall near edge
+ability 2 1 1
+board
+
+# Try to move through edge firewall
+move G up
+board
+move G up
+board
+
+# Test 13: Test firewall with server port interaction
+# Place firewall near server port
+ability 2 1 3
+board
+
+# Try to move through firewall near server port
+move H down
+board
+move H down
+board
+
+# Test 14: Test firewall effect on revealed links
+# Move a revealed link through firewall
+move A left
+board
+move A left
+board
+
+# Test 15: Test firewall effect on different link types
+# Test with different virus and data links
+move I down
+board
+move I down
+board
+
+move J down
+board
+move J down
+board
+
+# Final board state
+board 
