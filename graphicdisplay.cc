@@ -111,6 +111,7 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
     const auto &players = game.getPlayers();
     const Player *p1 = players[0];
     const Player *p2 = players[1];
+    const auto &foggedCells = game.getFoggedCells();
 
     int lineHeight = 15;
     int infoHeightTop = 70;
@@ -153,10 +154,13 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
     for (int r = 0; r < gridSize; ++r) {
         for (int c = 0; c < gridSize; ++c) {
             const Cell &cell = board.at(r, c);
-
+            bool isFogged = (foggedCells.find({r, c}) != foggedCells.end());
+            
             DrawnState newState{' ', false, false, LinkType::Data};
-
-            if (!cell.isEmpty()) {
+            if (isFogged) {
+                newState.symbol = '?';
+            }
+            else if (!cell.isEmpty()) {
                 Link *link = cell.getLink();
                 Player *owner = link->getOwner();
                 bool visible = (owner == p1 || link->isRevealed());
@@ -176,14 +180,25 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
 
             // Only redraw if something changed
             const DrawnState &oldState = lastDrawn[r][c];
-            if (oldState.symbol != newState.symbol ||
+            if (isFogged || oldState.symbol != newState.symbol ||
                 oldState.boosted != newState.boosted ||
                 oldState.visible != newState.visible ||
                 oldState.jammed  != newState.jammed  ||
                 (newState.visible && oldState.type != newState.type)) {
 
                 const_cast<GraphicDisplay*>(this)->lastDrawn[r][c] = newState;
-                drawCell(r, c, cell, p1);
+                if (isFogged) {
+                    int x = c * cellWidth + 10;
+                    int offsetY = 100;
+                    int y = offsetY + r * cellHeight;
+                    int fogColor = Xwindow::Grey;
+                    int margin = 4;
+
+                    xw.fillRectangle(x + margin, y + margin, cellWidth - 2*margin, cellHeight - 2*margin, fogColor);
+                    xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, "?", Xwindow::Black);
+                } else {
+                    drawCell(r, c, cell, p1);
+                }
             }
 
         }
