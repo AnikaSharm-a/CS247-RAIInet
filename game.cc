@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 using namespace std;
 
 // Accessors and mutators
@@ -20,7 +21,7 @@ void Game::setTurnNumber(int t) { turnNumber = t; }
 void Game::setCurrentPlayerIdx(int idx) { currentPlayerIdx = idx; }
 void Game::setGameOver(bool over) { gameOver = over; }
 void Game::setController(Controller* c) { controller = c; }
-const map<pair<int, int>, tuple<CellType, int, int>>& Game::getFoggedCells() const { return foggedCells; }
+const map<pair<int, int>, pair<CellType, vector<pair<int, int>>>>& Game::getFoggedCells() const { return foggedCells; }
 void Game::setupLinksForPlayer(Player* p, bool isPlayer1) {
     if (isPlayer1) {
         board.at(0,0).setLink(p->getLink('a'));
@@ -287,7 +288,13 @@ void Game::applyFogEffect(int row, int col, int ownerId) {
             auto coord = make_pair(r, c);
 
             if (foggedCells.find(coord) == foggedCells.end()) {
-                foggedCells[coord] = make_tuple(cell.getType(), turnNumber, ownerId); // record original, turn, owner
+                // First fog on this cell - store original type
+                CellType originalType = cell.getType();
+                foggedCells[coord] = make_pair(originalType, vector<pair<int, int>>{{turnNumber, ownerId}});
+                cell.setType(CellType::Fog);
+            } else {
+                // Cell already fogged - add new fog to the list
+                foggedCells[coord].second.push_back(make_pair(turnNumber, ownerId));
                 cell.setType(CellType::Fog);
             }
         }
@@ -300,12 +307,9 @@ void Game::removeFogEffect() {
     for (auto& entry : foggedCells) {
         int r = entry.first.first;
         int c = entry.first.second;
-        CellType originalType;
-        int appliedTurn;
-        int ownerId;
-
-        tie(originalType, appliedTurn, ownerId) = entry.second;
-
+        
+        // Get the original cell type
+        CellType originalType = entry.second.first;
         board->at(r, c).setType(originalType);
     }
 
@@ -316,28 +320,33 @@ void Game::removeFogEffect() {
 
 void Game::updateFog() {
     Board* board = getBoard();
-    vector<pair<int, int>> toRemove;
+    vector<pair<int, int>> cellsToCheck;
 
+    // Collect all fogged cells
     for (const auto& entry : foggedCells) {
-        auto coord = entry.first;
-        CellType originalType;
-        int appliedTurn;
-        int ownerId;
-
-        tie(originalType, appliedTurn, ownerId) = entry.second;
-
-        if (turnNumber - appliedTurn >= 5) {
-            toRemove.push_back(coord);
-        }
+        cellsToCheck.push_back(entry.first);
     }
 
-    for (const auto& coord : toRemove) {
-        CellType originalType;
-        int appliedTurn;
-        int ownerId;
+    // Check each fogged cell
+    for (const auto& coord : cellsToCheck) {
+        auto& fogEntry = foggedCells[coord];
+        auto& fogList = fogEntry.second;
+        
+        // Remove expired fogs (older than 5 turns)
+        fogList.erase(
+            remove_if(fogList.begin(), fogList.end(),
+                [this](const auto& fog) {
+                    int appliedTurn = fog.first;
+                    return (turnNumber - appliedTurn >= 5);
+                }),
+            fogList.end()
+        );
 
-        tie(originalType, appliedTurn, ownerId) = foggedCells[coord];
-        board->at(coord.first, coord.second).setType(originalType);
-        foggedCells.erase(coord);
+        // If no fogs remain, restore original cell type
+        if (fogList.empty()) {
+            CellType originalType = fogEntry.first;
+            board->at(coord.first, coord.second).setType(originalType);
+            foggedCells.erase(coord);
+        }
     }
 }
