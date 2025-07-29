@@ -11,7 +11,8 @@ enum class MoveResult {
     BattleLost,
     DownloadedOffBoard,
     DownloadedOnServerPort,
-    DownloadedByFirewall
+    DownloadedByFirewall,
+    Jammed
 };
 
 struct MoveOutcome {

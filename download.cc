@@ -25,6 +25,9 @@ void Download::use(Game* game,
     if (link->getOwner() == player)
         throw invalid_argument("Download: cannot download your own link");
 
-    // delegate to Game’s download logic so counters, removal, reveal, etc. happen
+    // Remove the link from the board
+    cell.removeLink();
+    
+    // delegate to Game's download logic so counters, removal, reveal, etc. happen
     game->download(link, player);
 }

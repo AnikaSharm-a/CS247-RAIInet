@@ -11,6 +11,8 @@ class Link {
     Player* owner;
     bool revealed = false;
     bool boosted = false;
+    bool jammed = false;
+    int jammedOnTurn = -1; // Track which turn the jam was applied
 
 public:
     Link(char id, LinkType type, int strength, Player* owner)
@@ -26,6 +28,10 @@ public:
     bool isBoosted() const { return boosted; }
     void boost() { boosted = true; }
     void removeBoost() { boosted = false; }
+    bool isJammed() const { return jammed; }
+    void jam(int turnNumber) { jammed = true; jammedOnTurn = turnNumber; }
+    void unjam() { jammed = false; jammedOnTurn = -1; }
+    int getJammedOnTurn() const { return jammedOnTurn; }
 
     Link* battle(Link* opponent);
 };
