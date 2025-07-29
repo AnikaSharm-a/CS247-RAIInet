@@ -15,6 +15,7 @@ int Game::getCurrentPlayerIdx() const { return currentPlayerIdx; }
 bool Game::isGameOver() const { return gameOver; }
 Controller* Game::getController() { return controller; }
 int Game::getCurrentTurn() const { return turnNumber; }
+void Game::setTurnNumber(int t) { turnNumber = t; }
 
 void Game::setCurrentPlayerIdx(int idx) { currentPlayerIdx = idx; }
 void Game::setGameOver(bool over) { gameOver = over; }
@@ -163,21 +164,21 @@ bool Game::playerMove(char id, Direction dir) {
     checkVictory();
 
     // Advance turn if game is not over
-    if (!gameOver) {
-        // Unjam links that were jammed two turns ago (after opponent's turn)
-        for (auto* p : players) {
-            for (auto& entry : p->getLinks()) {
-                Link* link = entry.second;
-                if (link->isJammed() && link->getJammedOnTurn() <= turnNumber - 2) {
-                    link->unjam();
-                }
-            }
-        }
-        currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
-        turnNumber++; // Increment turn number
-        updateFog();
+    // if (!gameOver) {
+    //     // Unjam links that were jammed two turns ago (after opponent's turn)
+    //     for (auto* p : players) {
+    //         for (auto& entry : p->getLinks()) {
+    //             Link* link = entry.second;
+    //             if (link->isJammed() && link->getJammedOnTurn() <= turnNumber - 2) {
+    //                 link->unjam();
+    //             }
+    //         }
+    //     }
+    //     currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+    //     turnNumber++; // Increment turn number
+    //     updateFog();
 
-    }
+    // }
 
     return true;
 }
@@ -314,7 +315,7 @@ void Game::updateFog() {
 
         tie(originalType, appliedTurn, ownerId) = entry.second;
 
-        if (turnNumber - appliedTurn >= 2) {
+        if (turnNumber - appliedTurn >= 5) {
             toRemove.push_back(coord);
         }
     }

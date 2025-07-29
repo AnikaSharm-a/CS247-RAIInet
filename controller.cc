@@ -130,11 +130,24 @@ void Controller::play(istream &in) {
             }
         }
 
-        // Check for game end after a move
         if (game->checkVictory()) break;
 
-        // Switch to next player
-        // game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
+        view->print(*game, cout);
+
+        if (game->checkVictory()) break;
+
+        for (auto* p : game->getPlayers()) {
+            for (auto& entry : p->getLinks()) {
+                Link* link = entry.second;
+                if (link->isJammed() && link->getJammedOnTurn() <= game->getCurrentTurn() - 2) {
+                    link->unjam();
+                }
+            }
+        }
+
+        game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
+        game->updateFog();
+        game->setTurnNumber(game->getCurrentTurn() + 1); // Make sure this setter exists in your Game class
     }
 }
 
