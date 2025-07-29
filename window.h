@@ -10,13 +10,13 @@ class Xwindow {
   Window w;
   int s, width, height;
   GC gc;
-  unsigned long colours[6];
+  unsigned long colours[7];
 
  public:
   Xwindow(int width=500, int height=500);  // Constructor; displays the window.
   ~Xwindow();                              // Destructor; destroys the window.
 
-  enum {White=0, Black, Red, Green, Blue, Orange}; // Available colours.
+  enum {White=0, Black, Red, Green, Blue, Orange, Purple}; // Available colours.
 
   int getWidth() const;
   int getHeight() const;
@@ -27,6 +27,8 @@ class Xwindow {
   // Draws a string
   void drawString(int x, int y, string msg);
   void drawString(int x, int y, string msg, int colour);
+
+  void drawLine(int x1, int y1, int x2, int y2, int colour = Black);
 
 };
 

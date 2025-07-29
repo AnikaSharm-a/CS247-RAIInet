@@ -13,14 +13,17 @@ class GraphicDisplay : public View {
     int gridSize;
     int cellWidth;
     int cellHeight;
+    int margin = 4;
 
     // Keep a snapshot of last drawn characters to allow partial redraw
     struct DrawnState {
         char symbol;
         bool boosted;
         bool visible;
-        LinkType type; // optional: only meaningful if visible
+        LinkType type; // only meaningful if visible
+        bool jammed;   // NEW: track jammed state
     };
+
     vector<vector<DrawnState>> lastDrawn;
 
     // --- ADD THESE CACHES ---
