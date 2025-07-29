@@ -19,7 +19,7 @@ int Game::getCurrentTurn() const { return turnNumber; }
 void Game::setCurrentPlayerIdx(int idx) { currentPlayerIdx = idx; }
 void Game::setGameOver(bool over) { gameOver = over; }
 void Game::setController(Controller* c) { controller = c; }
-const std::map<std::pair<int, int>, std::tuple<CellType, int, int>>& Game::getFoggedCells() const { return foggedCells; }
+const map<pair<int, int>, tuple<CellType, int, int>>& Game::getFoggedCells() const { return foggedCells; }
 void Game::setupLinksForPlayer(Player* p, bool isPlayer1) {
     if (isPlayer1) {
         board.at(0,0).setLink(p->getLink('a'));
@@ -264,18 +264,18 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
 
 void Game::applyFogEffect(int row, int col, int ownerId) {
     Board* board = getBoard();
-    int startRow = std::max(0, row - 1);
-    int endRow = std::min(7, row + 1);
-    int startCol = std::max(0, col - 1);
-    int endCol = std::min(7, col + 1);
+    int startRow = max(0, row - 1);
+    int endRow = min(7, row + 1);
+    int startCol = max(0, col - 1);
+    int endCol = min(7, col + 1);
 
     for (int r = startRow; r <= endRow; ++r) {
         for (int c = startCol; c <= endCol; ++c) {
             Cell& cell = board->at(r, c);
-            auto coord = std::make_pair(r, c);
+            auto coord = make_pair(r, c);
 
             if (foggedCells.find(coord) == foggedCells.end()) {
-                foggedCells[coord] = std::make_tuple(cell.getType(), turnNumber, ownerId); // record original, turn, owner
+                foggedCells[coord] = make_tuple(cell.getType(), turnNumber, ownerId); // record original, turn, owner
                 cell.setType(CellType::Fog);
             }
         }
@@ -292,19 +292,19 @@ void Game::removeFogEffect() {
         int appliedTurn;
         int ownerId;
 
-        std::tie(originalType, appliedTurn, ownerId) = entry.second;
+        tie(originalType, appliedTurn, ownerId) = entry.second;
 
         board->at(r, c).setType(originalType);
     }
 
     foggedCells.clear();
 
-    std::cout << "Fog effect removed and cells restored.\n";
+    cout << "Fog effect removed and cells restored.\n";
 }
 
 void Game::updateFog() {
     Board* board = getBoard();
-    std::vector<std::pair<int, int>> toRemove;
+    vector<pair<int, int>> toRemove;
 
     for (const auto& entry : foggedCells) {
         auto coord = entry.first;
@@ -312,7 +312,7 @@ void Game::updateFog() {
         int appliedTurn;
         int ownerId;
 
-        std::tie(originalType, appliedTurn, ownerId) = entry.second;
+        tie(originalType, appliedTurn, ownerId) = entry.second;
 
         if (turnNumber - appliedTurn >= 2) {
             toRemove.push_back(coord);
@@ -324,7 +324,7 @@ void Game::updateFog() {
         int appliedTurn;
         int ownerId;
 
-        std::tie(originalType, appliedTurn, ownerId) = foggedCells[coord];
+        tie(originalType, appliedTurn, ownerId) = foggedCells[coord];
         board->at(coord.first, coord.second).setType(originalType);
         foggedCells.erase(coord);
     }
