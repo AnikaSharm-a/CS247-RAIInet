@@ -112,6 +112,8 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
     const Player *p1 = players[0];
     const Player *p2 = players[1];
     const auto &foggedCells = game.getFoggedCells();
+    const Player* current = players[game.getCurrentPlayerIdx()];
+
 
     int lineHeight = 15;
     int infoHeightTop = 70;
@@ -154,7 +156,14 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
     for (int r = 0; r < gridSize; ++r) {
         for (int c = 0; c < gridSize; ++c) {
             const Cell &cell = board.at(r, c);
-            bool isFogged = (foggedCells.find({r, c}) != foggedCells.end());
+            bool isFogged = false;
+            auto fogIt = foggedCells.find({r, c});
+            if (fogIt != foggedCells.end()) {
+                int fogOwnerId = std::get<2>(fogIt->second);
+                if (fogOwnerId != current->getId()) {
+                    isFogged = true;
+                }
+            }
             
             DrawnState newState{' ', false, false, LinkType::Data};
             if (isFogged) {
