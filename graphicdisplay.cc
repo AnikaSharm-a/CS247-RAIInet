@@ -4,52 +4,78 @@
 #include "player.h"
 #include "link.h"
 #include "cell.h"
+#include <sstream>
+#include <algorithm>
 
 GraphicDisplay::GraphicDisplay(int gridSize, int width, int height)
     : xw{width, height}, gridSize{gridSize} {
     cellWidth = width / gridSize;
-    cellHeight = height / gridSize;
+    cellHeight = (height - 200) / gridSize; // 62.5 is the hardcoded value
     lastDrawn.assign(gridSize, std::vector<char>(gridSize, ' '));
 }
 
-// void GraphicDisplay::notify(int row, int col, CellType state) {
-//     // This could be hooked to an observer if you want incremental updates
-// }
+// Helper: choose text color (white if background is dark)
+int textColorForBackground(int bg) {
+    if (bg == Xwindow::Black || bg == Xwindow::Orange || bg == Xwindow::Blue) {
+        return Xwindow::White;
+    }
+    return Xwindow::Black;
+}
 
 void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) const {
     int x = c * cellWidth;
-    int y = r * cellHeight;
+    // Shift grid down by 100 pixels to leave space for text
+    int offsetY = 100;
+    int y = offsetY + r * cellHeight;
+
+    int bgColor = Xwindow::White;
+    std::string text = "";
+    int textColor = Xwindow::Black;
 
     if (!cell.isEmpty()) {
         Link *link = cell.getLink();
         Player *owner = link->getOwner();
+        bool visible = (owner == p1 || link->isRevealed());
 
-        int color = Xwindow::Black; // default for unknown
-        if (owner == p1) {
-            color = (link->getType() == LinkType::Data) ? Xwindow::Green : Xwindow::Red;
-        } else if (link->isRevealed()) {
-            color = (link->getType() == LinkType::Data) ? Xwindow::Green : Xwindow::Red;
-        } else {
-            color = Xwindow::Black;
-        }
-
-        xw.fillRectangle(x, y, cellWidth, cellHeight, color);
-
-        // Draw ID on top
-        std::string idStr(1, link->getId());
-        xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, idStr);
+        // Set background color based on ownership and type
+        if (link->getType() == LinkType::Data && visible) bgColor = Xwindow::Green;
+        else if (link->getType() == LinkType::Virus && visible) bgColor = Xwindow::Red;
+        else bgColor = Xwindow::Black;
         
-        // Draw boost indicator if link is boosted
+        // if (visible) {
+        //     bgColor = (link->getType() == LinkType::Data) ? Xwindow::Green : Xwindow::Red;
+            text = std::string(1, link->getId());
+        // } else {
+        //     // Hidden link
+        //     bgColor = Xwindow::Black;
+        //     text = "?";
+        // }
+
+        xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
+
+        // Choose text color so it’s visible
+        textColor = textColorForBackground(bgColor);
+        xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, text, textColor);
+
+        // Draw boost indicator
         if (link->isBoosted()) {
-            xw.drawString(x + 2*cellWidth/3, y + 2*cellHeight/3, "*");
+            xw.drawString(x + 2*cellWidth/3, y + 2*cellHeight/3, "*", textColor);
         }
     } else {
         if (cell.getType() == CellType::ServerPort) {
-            xw.fillRectangle(x, y, cellWidth, cellHeight, Xwindow::Blue);
+            bgColor = Xwindow::Blue;
+            xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
+            textColor = textColorForBackground(bgColor);
+            xw.drawString(x + cellWidth/3, y + 2*cellHeight/3, "S", textColor);
         } else if (cell.getType() == CellType::Firewall) {
-            xw.fillRectangle(x, y, cellWidth, cellHeight, Xwindow::Black);
+            bgColor = Xwindow::Orange;
+            xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
+            textColor = textColorForBackground(bgColor);
+            char fwChar = (cell.getOwnerId() == 1) ? 'm' : 'w';
+            xw.drawString(x + cellWidth/3, y + 2*cellHeight/3,
+                          std::string(1, fwChar), textColor);
         } else {
-            xw.fillRectangle(x, y, cellWidth, cellHeight, Xwindow::White);
+            xw.fillRectangle(x, y, cellWidth, cellHeight, bgColor);
         }
     }
 }
@@ -60,12 +86,48 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
     const Player *p1 = players[0];
     const Player *p2 = players[1];
 
-    // Compare and update only changed cells
+    int lineHeight = 15;
+    int infoHeightTop = 70;
+    int boardOffsetY = infoHeightTop;
+
+    // ---------- 1. Build Player 1 info as a single string ----------
+    std::ostringstream p1Stream;
+    p1Stream << "Player 1:\n";
+    p1Stream << "Downloaded: " << p1->getDownloadedData()
+             << "D, " << p1->getDownloadedVirus() << "V\n";
+    p1Stream << "Abilities: " << p1->getNumUnusedAbilities() << "\n";
+
+    for (char id = 'a'; id <= 'h'; ++id) {
+        auto *link = p1->getLink(id);
+        if (!link) continue;
+        p1Stream << id << ": "
+                 << (link->getType() == LinkType::Data ? "D" : "V")
+                 << link->getStrength() << " ";
+    }
+    std::string newP1Info = p1Stream.str();
+
+    // ---------- 2. Only redraw if info changed ----------
+    if (newP1Info != lastP1Info) {
+        lastP1Info = newP1Info;
+
+        // Clear background
+        xw.fillRectangle(0, 0, gridSize * cellWidth, infoHeightTop, Xwindow::White);
+
+        // Draw lines
+        std::istringstream iss(newP1Info);
+        std::string line;
+        int y = 15;
+        while (std::getline(iss, line)) {
+            xw.drawString(10, y, line);
+            y += lineHeight;
+        }
+    }
+
+    // ---------- 3. Draw the board ----------
     for (int r = 0; r < gridSize; ++r) {
         for (int c = 0; c < gridSize; ++c) {
             const Cell &cell = board.at(r, c);
 
-            // Represent cell as a char for comparison
             char currentSymbol = '.';
             if (!cell.isEmpty()) {
                 Link *link = cell.getLink();
@@ -76,9 +138,7 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
                     currentSymbol = '?';
             } else if (cell.getType() == CellType::ServerPort) currentSymbol = 'S';
             else if (cell.getType() == CellType::Firewall) currentSymbol = 'F';
-            else currentSymbol = '.';
 
-            // Only redraw if the cell content has changed
             if (lastDrawn[r][c] != currentSymbol) {
                 const_cast<GraphicDisplay*>(this)->lastDrawn[r][c] = currentSymbol;
                 drawCell(r, c, cell, p1);
@@ -86,12 +146,41 @@ void GraphicDisplay::print(const Game &game, std::ostream &out) const {
         }
     }
 
-    // Draw player info
-    int textY = gridSize * cellHeight + 20;
-    xw.drawString(10, textY, "P1: D" + std::to_string(p1->getDownloadedData()) +
-                              " V" + std::to_string(p1->getDownloadedVirus()) +
-                              " Abilities:" + std::to_string(p1->getNumUnusedAbilities()));
-    xw.drawString(10, textY + 20, "P2: D" + std::to_string(p2->getDownloadedData()) +
-                                  " V" + std::to_string(p2->getDownloadedVirus()) +
-                                  " Abilities:" + std::to_string(p2->getNumUnusedAbilities()));
+    // ---------- 4. Build Player 2 info as a single string ----------
+    std::ostringstream p2Stream;
+    p2Stream << "Player 2:\n";
+    p2Stream << "Downloaded: " << p2->getDownloadedData()
+             << "D, " << p2->getDownloadedVirus() << "V\n";
+    p2Stream << "Abilities: " << p2->getNumUnusedAbilities() << "\n";
+
+    for (char id = 'A'; id <= 'H'; ++id) {
+        auto *link = p2->getLink(id);
+        if (!link) continue;
+        if (link->isRevealed()) {
+            p2Stream << id << ": "
+                     << (link->getType() == LinkType::Data ? "D" : "V")
+                     << link->getStrength() << " ";
+        } else {
+            p2Stream << id << ": ? ";
+        }
+    }
+    std::string newP2Info = p2Stream.str();
+
+    // ---------- 5. Redraw Player 2 info only if changed ----------
+    int p2StartAreaY = boardOffsetY + gridSize * cellHeight + 30;
+    int p2AreaHeight = 70;
+    if (newP2Info != lastP2Info) {
+        lastP2Info = newP2Info;
+
+        // Clear background
+        xw.fillRectangle(0, p2StartAreaY, gridSize * cellWidth, p2AreaHeight, Xwindow::White);
+
+        std::istringstream iss2(newP2Info);
+        std::string line2;
+        int y2 = p2StartAreaY + 15;
+        while (std::getline(iss2, line2)) {
+            xw.drawString(10, y2, line2);
+            y2 += lineHeight;
+        }
+    }
 }

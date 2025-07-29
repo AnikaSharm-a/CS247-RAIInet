@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
     game.getPlayers().push_back(p2);
 
     if (graphics) {
-        gd = new GraphicDisplay(8, 500, 500);
+        gd = new GraphicDisplay(8, 500, 700);
         viewToUse = gd;
     }
 
