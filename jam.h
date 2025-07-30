@@ -10,10 +10,7 @@ public:
     ~Jam() override = default;
 
     // requires a target opponent link ID
-    void use(Game* game,
-             Player* player,
-             int row,
-             int col) override;
+    void use(Game* game, Player* player, int row, int col) override;
 };
 
 #endif
