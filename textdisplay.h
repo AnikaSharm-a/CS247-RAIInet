@@ -6,27 +6,24 @@
 #include "view.h"
 using namespace std;
 
-class Game; // forward declaration
+class Game;
 
 class TextDisplay : public View {
     vector<vector<char>> theDisplay;
-    Game* gameRef;  // Reference to the game for redrawing
-    bool hasRedrawnThisTurn;  // Flag to prevent multiple redraws per turn
+    Game* gameRef;//reference to game
+    bool hasRedrawnThisTurn;//prevent redraws
 
 public:
     TextDisplay(int gridSize);
 
-    // Observer pattern notification method
+    //observer pattern notification method
     void notify(const NotificationData& data) override;
 
-    // Set the game reference
+    //set game ref
     void setGameRef(Game* game) { gameRef = game; }
 
-    // Updates a single cell character (from Board notifications)
-    // void notify(int row, int col, char symbol) override;
-
-    // Prints the entire game state: both players + board
+    //prints the entire game state: both players + board
     void print(const Game& game, ostream &out) const override;
 };
 
-#endif // TEXTDISPLAY_H
+#endif

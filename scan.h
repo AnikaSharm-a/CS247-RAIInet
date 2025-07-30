@@ -3,17 +3,17 @@
 
 #include "ability.h"
 
-// ability that reveals an opponent's link, showing its type and strength
+//ability that reveals an opponent's link, showing its type and strength
 class Scan : public Ability {
 public:
     Scan();
     ~Scan() override = default;
 
-    // reveal opponent's link at (row,col) (show type & strength)
+    //reveal opponent's link at row, col
     void use(Game* game,
              Player* player,
              int row,
              int col) override;
 };
 
-#endif // SCAN_H
+#endif

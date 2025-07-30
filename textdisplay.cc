@@ -9,7 +9,7 @@ using namespace std;
 
 TextDisplay::TextDisplay(int gridSize) : gameRef(nullptr), hasRedrawnThisTurn(false) {
     theDisplay.assign(gridSize, vector<char>(gridSize, '.'));
-    // Mark server ports
+    //server ports
     theDisplay[0][3] = 'S';
     theDisplay[0][4] = 'S';
     theDisplay[7][3] = 'S';
@@ -17,41 +17,41 @@ TextDisplay::TextDisplay(int gridSize) : gameRef(nullptr), hasRedrawnThisTurn(fa
 }
 
 void TextDisplay::notify(const NotificationData& data) {
-    // Only redraw for link movements - this is the most important event
+    //redraw for link movement
     if (gameRef && data.type == NotificationType::LinkMoved) {
-        cout << endl; // Add spacing for link movements
+        cout << endl;
         print(*gameRef, cout);
     }
-    // For turn changes, just add spacing but don't redraw (since we already redrew for the move)
+    //turn changes - not rerender
     else if (data.type == NotificationType::GameStateChanged) {
-        cout << endl; // Add extra spacing for turn changes
+        cout << endl;
     }
-    // Ignore all other notifications
+    //ignore other notifications - for graphicDisplay
 }
 
 void TextDisplay::print(const Game &game, ostream &out) const {
-    // Access players const-correctly
-    const auto& players = game.getPlayers(); // Make sure getPlayers() returns const ref for const Game
+    //access players
+    const auto& players = game.getPlayers(); 
     const Player* p1 = players[0];
     const Player* p2 = players[1];
     const Player* current = players[game.getCurrentPlayerIdx()];
 
 
-    // Print Player 1 info
+    //print player 1 info
     out << "\nPlayer 1:\n";
     out << "Downloaded: " << p1->getDownloadedData() << "D, " << p1->getDownloadedVirus() << "V\n";
     out << "Abilities: " << p1->getNumUnusedAbilities() << "\n";
-    // Show links for Player 1 depending on whether current player is Player 1
+    //show links depending on current player
     int linkCount = 0;
     for (const auto& pair : p1->getLinks()) {
         char id = pair.first;
         auto link = pair.second.get();
         if (current == p1) {
-            // Current player sees all own links fully
+            //see all links fully
             string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
             out << id << ": " << typeStr << link->getStrength() << " ";
         } else {
-            // Opponent view: show revealed or '?'
+            //? for opponent
             if (link->isRevealed()) {
                 string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
                 out << id << ": " << typeStr << link->getStrength() << " ";
@@ -60,21 +60,21 @@ void TextDisplay::print(const Game &game, ostream &out) const {
             }
         }
         
-        // Add newline after every 4 links
+        //print formatting
         linkCount++;
         if (linkCount == 4) {
             out << "\n";
         }
     }
-    // Add final newline if we didn't just add one
+    //add final newline if we didn't just add one
     if (linkCount % 4 != 0) {
         out << "\n";
     }
-    out << "\n"; // Add extra spacing before the board separator
+    out << "\n"; //add extra spacing before the board separator
 
     out << "========\n";
 
-    // Board print (8x8)
+    //board print
     const auto& board = *game.getBoard();
     const auto& fogged = game.getFoggedCells();
 
@@ -85,7 +85,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
 
             auto fogIt = fogged.find(coord);
             if (fogIt != fogged.end()) {
-                // Check if current player owns ALL fog on this cell
+                //check if current player owns fog
                 bool ownsAllFog = true;
                 for (const auto& fog : fogIt->second.second) {
                     int fogOwnerId = fog.second;
@@ -94,13 +94,12 @@ void TextDisplay::print(const Game &game, ostream &out) const {
                         break;
                     }
                 }
-
-                // Show '?' if current player doesn't own ALL fog on this cell
+                //if fog is not owned, display ?
                 if (!ownsAllFog) {
                     out << "?";
-                    continue;  // skip to next cell
+                    continue;
                 }
-                // else fallthrough to show normal content only if player owns all fog
+                //display normally if not fogged
             }
             if (!cell.isEmpty()) {
                 auto link = cell.getLink();
@@ -112,7 +111,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
                     out << link->getId();
                 }
             } else {
-                // Print Server Ports as 'S', otherwise '.'
+                //server ports
                 if (cell.getType() == CellType::ServerPort) {
                     out << "S";
                 } else if (cell.getType() == CellType::Firewall) {
@@ -128,7 +127,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
     out << "========\n";
 
     
-    // Print Player 2 info similarly
+    //player 2 info
     out << "Player 2:\n";
     out << "Downloaded: " << p2->getDownloadedData() << "D, " << p2->getDownloadedVirus() << "V\n";
     out << "Abilities: " << p2->getNumUnusedAbilities() << "\n";
@@ -138,11 +137,11 @@ void TextDisplay::print(const Game &game, ostream &out) const {
         char id = pair.first;
         auto link = pair.second.get();
         if (current == p2) {
-            // Current player sees own links fully
+            //sees own links
             string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
             out << id << ": " << typeStr << link->getStrength() << " ";
         } else {
-            // Opponent sees revealed or '?'
+            //see ?
             if (link->isRevealed()) {
                 string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
                 out << id << ": " << typeStr << link->getStrength() << " ";
@@ -151,13 +150,13 @@ void TextDisplay::print(const Game &game, ostream &out) const {
             }
         }
         
-        // Add newline after every 4 links
+        //add new line for print formatting
         linkCount2++;
         if (linkCount2 == 4) {
             out << "\n";
         }
     }
-    // Add final newline if we didn't just add one
+    //add one if not added already
     if (linkCount2 % 4 != 0) {
         out << "\n";
     }

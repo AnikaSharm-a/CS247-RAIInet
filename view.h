@@ -38,10 +38,10 @@ struct NotificationData {
 
 class View {
 public:
-    // Observer pattern notification method
+    //observer pattern notification method
     virtual void notify(const NotificationData& data) = 0;
 
-    // Legacy print method for backward compatibility
+    //print method
     virtual void print(const Game &game, ostream &out) const = 0;
 
     virtual ~View() = default;

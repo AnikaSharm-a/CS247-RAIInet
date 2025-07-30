@@ -343,7 +343,6 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
         // notify about ability usage and player state change
         if (controller) {
             controller->notifyPlayerChanged(player->getId());
-            cout << "Notifying cell changed " << row << " " << col << endl;
             controller->notifyCellChanged(row, col);
         }
         

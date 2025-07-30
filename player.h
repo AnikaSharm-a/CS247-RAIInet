@@ -10,7 +10,7 @@
 #include "ability.h"
 using namespace std;
 
-class Link;      // forward declare
+class Link; // forward declare
 
 class Player {
     int id;
@@ -23,7 +23,7 @@ class Player {
 public:
     Player(int id);
 
-    // Getters
+    //getters
     int getId() const;
     const map<char, unique_ptr<Link>>& getLinks() const;
     set<int>& getUsedAbilities();
@@ -32,43 +32,42 @@ public:
     int getNumLinks() const;
     int getStrengthSum() const;
 
-    // Link management
+    //link management
     void addLink(unique_ptr<Link> link);
     std::shared_ptr<Link> getLink(char id) const;
     void removeLink(char id);
     bool ownsLink(char id) const;
     vector<std::shared_ptr<Link>> getAllLinks() const;
 
-    // Reveal
+    //reveal links
     void revealLink(char id);
     bool isLinkRevealed(char id) const;
 
-    // Abilities
+    //abilities pt 1
     bool canUseAbility(int abilityID) const;
     int getNumUnusedAbilities() const;
 
-    // Download counters
+    //download
     void incrementDownload(Link* link);
     void resetDownloads();
 
-    // Game status
+    //game status
     bool hasWon() const;
     bool hasLost() const;
     bool hasLostOrWon() const;
     
-    // Ability management
+    //ability management
     void addAbility(unique_ptr<Ability> ability);
     Ability* getAbility(int abilityId);
     bool isAbilityUsed(int abilityId) const;
     void markAbilityUsed(int abilityId);
     int getNumAbilities() const;
     
-    // Enhanced ability management
     void displayAbilities() const;
     bool hasUnusedAbilities() const;
     int getUnusedAbilityCount() const;
     vector<string> getAbilityNames() const;
-    void resetAbilities(); // For testing or new games
+    void resetAbilities();
 };
 
-#endif // PLAYER_H
+#endif

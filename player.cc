@@ -121,7 +121,7 @@ Ability* Player::getAbility(int abilityId) {
     if (abilityId < 1 || abilityId > static_cast<int>(abilities.size())) {
         return nullptr;
     }
-    return abilities[abilityId - 1].get(); // Convert to 0-based indexing
+    return abilities[abilityId - 1].get(); //convert
 }
 
 bool Player::isAbilityUsed(int abilityId) const {

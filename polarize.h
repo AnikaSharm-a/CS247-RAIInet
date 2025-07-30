@@ -3,17 +3,17 @@
 
 #include "ability.h"
 
-// ability that changes a link's type from data to virus or vice versa
+//change a link from data to virus and the same vice versa
 class Polarize : public Ability {
 public:
     Polarize();
     ~Polarize() override = default;
 
-    // flip opponent's data↔virus at (row,col)
+    //flip data and virus
     void use(Game* game,
              Player* player,
              int row,
              int col) override;
 };
 
-#endif // POLARIZE_H
+#endif

@@ -7,10 +7,10 @@
 #include <stdexcept>
 using namespace std;
 
-// constructor sets the ability name
+//name
 Polarize::Polarize() : Ability("Polarize"){}
 
-// flips the type of a link from data to virus or vice versa
+//change the type of link from data to virus and vice versa
 void Polarize::use(Game* game,
                    Player* player,
                    int row,
@@ -23,6 +23,6 @@ void Polarize::use(Game* game,
 
     auto link = cell.getLink();
 
-    // flip type, leave strength alone
+    //flip type
     link->setType(link->getType() == LinkType::Data ? LinkType::Virus : LinkType::Data);
 }

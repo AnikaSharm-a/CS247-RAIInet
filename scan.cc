@@ -7,10 +7,10 @@
 #include <stdexcept>
 using namespace std;
 
-// constructor sets the ability name
+//name
 Scan::Scan() : Ability("Scan") {}
 
-// reveals an opponent's link, making its type and strength visible
+//reveal opponent link
 void Scan::use(Game* game,
                Player* player,
                int row,
@@ -22,15 +22,15 @@ void Scan::use(Game* game,
         throw invalid_argument("Scan: no link at target cell");
 
     auto link = cell.getLink();
-    // allow scanning any link on the field
-    // for own links, we can scan them but they won't be revealed
-    // for opponent links, reveal them
+    //scan any link on the board
+    //no effect on our own links
+    //reveal opponent links
     
     if (link->getOwner() != player) {
-        // reveal opponent links
+        //reveal only opponent links
         link->reveal();
     }
-    // for own links, do nothing (they remain unrevealed)
+    //error handling
     else{
         throw invalid_argument("Scan: cannot scan own link");
     }

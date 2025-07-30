@@ -31,7 +31,7 @@ public:
     // sets the link in this cell using a shared_ptr
     void setLink(shared_ptr<Link> l) { link = l; }
     
-    // sets the link in this cell using a raw pointer for backward compatibility
+    // sets the link in this cell using a raw pointer
     void setLink(Link* l) { link = shared_ptr<Link>(l); }
     
     // removes the link from this cell
