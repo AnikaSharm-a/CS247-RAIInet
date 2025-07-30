@@ -1,4 +1,6 @@
-#pragma once
+#ifndef TEXTDISPLAY_H
+#define TEXTDISPLAY_H
+
 #include <vector>
 #include <ostream>
 #include "view.h"
@@ -26,3 +28,5 @@ public:
     // Prints the entire game state: both players + board
     void print(const Game& game, ostream &out) const override;
 };
+
+#endif // TEXTDISPLAY_H

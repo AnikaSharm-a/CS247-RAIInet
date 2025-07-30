@@ -1,4 +1,6 @@
-#pragma once
+#ifndef LINK_H
+#define LINK_H
+
 #include "linkType.h"
 #include "player.h"
 
@@ -35,3 +37,5 @@ public:
 
     Link* battle(Link* opponent);
 };
+
+#endif // LINK_H

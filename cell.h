@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CELL_H
+#define CELL_H
+
 #include "link.h"
 #include "cellType.h"
 
@@ -22,3 +24,5 @@ public:
     void setType(CellType newType) { type = newType; }
 
 };
+
+#endif // CELL_H

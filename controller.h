@@ -23,15 +23,11 @@ class Controller {
     bool parseCommand(const string &cmd, istream &in, Player* currentPlayer, bool &moved, bool &abilityUsed);
     static LinkType parseLinkType(const string& s);
     static int parseStrength(const string& s);
-    void loadLinksFromFile(const string& filename, Player* player, bool isPlayer1);
-    void generateDefaultLinks(Player* player, bool isPlayer1);
 
 public:
     Controller(unique_ptr<View> view, unique_ptr<Game> game);
     void play(istream &in);
-    void setupPlayers(Player* p1, Player* p2, 
-                      const string& ability1Str, const string& ability2Str,
-                      const string& link1File, const string& link2File);
+    void loadLinksFromFile(const string& filename, Player* player, bool isPlayer1);
     
     // Observer management
     void attachObserver(View* observer);

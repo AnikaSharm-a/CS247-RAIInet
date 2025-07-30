@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
     Controller controller(move(viewToUse), move(game));
 
     try {
-        controller.setupPlayers(controller.getGame()->getPlayers()[0], controller.getGame()->getPlayers()[1], ability1Str, ability2Str, link1File, link2File);
+        controller.getGame()->setupPlayers(controller.getGame()->getPlayers()[0], controller.getGame()->getPlayers()[1], ability1Str, ability2Str, link1File, link2File);
     } catch (const exception& e) {
         cerr << "Setup failed: " << e.what() << "\n";
         cerr << "\n" << AbilityFactory::getUsageInfo() << "\n";

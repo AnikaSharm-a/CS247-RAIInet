@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PLAYER_H
+#define PLAYER_H
+
 #include <map>
 #include <vector>
 #include <set>
@@ -69,3 +71,5 @@ public:
     vector<string> getAbilityNames() const;
     void resetAbilities(); // For testing or new games
 };
+
+#endif // PLAYER_H

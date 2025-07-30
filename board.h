@@ -1,4 +1,6 @@
-#pragma once
+#ifndef BOARD_H
+#define BOARD_H
+
 #include "cell.h"
 #include "link.h"
 #include <vector>
@@ -49,3 +51,5 @@ public:
     // Setter for controller reference
     void setController(Controller* c) { controller = c; }
 };
+
+#endif // BOARD_H

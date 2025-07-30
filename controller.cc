@@ -197,18 +197,19 @@ void Controller::play(istream &in) {
 
         if (game->checkVictory()) break;
 
-        for (auto* p : game->getPlayers()) {
-            for (auto& entry : p->getLinks()) {
-                Link* link = entry.second;
-                if (link->isJammed() && link->getJammedOnTurn() <= game->getCurrentTurn() - 2) {
-                    link->unjam();
-                }
-            }
-        }
+        // Turn management operations moved to Game::playerMove
+        // for (auto* p : game->getPlayers()) {
+        //     for (auto& entry : p->getLinks()) {
+        //         Link* link = entry.second;
+        //         if (link->isJammed() && link->getJammedOnTurn() <= game->getCurrentTurn() - 2) {
+        //             link->unjam();
+        //         }
+        //     }
+        // }
 
         game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
-        game->updateFog();
-        game->setTurnNumber(game->getCurrentTurn() + 1);
+        // game->updateFog();
+        // game->setTurnNumber(game->getCurrentTurn() + 1);
         // Observer pattern will handle the display update automatically
     }
 }
@@ -247,48 +248,6 @@ void Controller::loadLinksFromFile(const string& filename, Player* player, bool 
         char id = isPlayer1 ? ('a' + i) : ('A' + i);
         auto link = make_unique<Link>(id, type, strength, player);
         player->addLink(move(link));
-    }
-}
-
-void Controller::generateDefaultLinks(Player* player, bool isPlayer1) {
-    vector<pair<LinkType,int>> configs = {
-        {LinkType::Virus, 1}, {LinkType::Data, 4},
-        {LinkType::Virus, 3}, {LinkType::Virus, 2},
-        {LinkType::Data, 3}, {LinkType::Virus, 4},
-        {LinkType::Data, 2}, {LinkType::Data, 1}
-    };
-
-    static random_device rd;
-    static mt19937 g(rd());
-    shuffle(configs.begin(), configs.end(), g);
-
-    char id = isPlayer1 ? 'a' : 'A';
-    for (const auto& cfg : configs) {
-        auto link = make_unique<Link>(id, cfg.first, cfg.second, player);
-        player->addLink(move(link));
-        ++id;
-    }
-}
-
-void Controller::setupPlayers(Player* p1, Player* p2,
-                              const string& ability1Str, const string& ability2Str,
-                              const string& link1File, const string& link2File) {
-    auto p1Abilities = AbilityFactory::createAbilities(ability1Str);
-    for (auto& ability : p1Abilities) p1->addAbility(move(ability));
-
-    auto p2Abilities = AbilityFactory::createAbilities(ability2Str);
-    for (auto& ability : p2Abilities) p2->addAbility(move(ability));
-
-    if (!link1File.empty()) {
-        loadLinksFromFile(link1File, p1, true);
-    } else {
-        generateDefaultLinks(p1, true);
-    }
-
-    if (!link2File.empty()) {
-        loadLinksFromFile(link2File, p2, false);
-    } else {
-        generateDefaultLinks(p2, false);
     }
 }
 

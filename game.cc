@@ -1,10 +1,13 @@
 #include "game.h"
 #include "controller.h"
 #include "ability.h"
+#include "abilityFactory.h"
 #include <iostream>
 #include <string>
 #include <stdexcept>
 #include <algorithm>
+#include <fstream> // Added for file loading
+#include <random> // Added for random functionality
 using namespace std;
 
 // Accessors and mutators
@@ -237,6 +240,22 @@ bool Game::playerMove(char id, Direction dir) {
 
     checkVictory();
 
+    // Unjam links that have been jammed for 2+ turns
+    for (auto* p : getPlayers()) {
+        for (auto& entry : p->getLinks()) {
+            Link* link = entry.second;
+            if (link->isJammed() && link->getJammedOnTurn() <= turnNumber - 2) {
+                link->unjam();
+            }
+        }
+    }
+
+    // Update fog effects
+    updateFog();
+
+    // Increment turn number
+    setTurnNumber(turnNumber + 1);
+
     return true;
 }
 
@@ -444,5 +463,47 @@ void Game::updateFog() {
     // Notify about board change if any cells were updated
     if (!cellsToErase.empty() && controller) {
         controller->notifyBoardChanged();
+    }
+}
+
+void Game::setupPlayers(Player* p1, Player* p2,
+                        const string& ability1Str, const string& ability2Str,
+                        const string& link1File, const string& link2File) {
+    auto p1Abilities = AbilityFactory::createAbilities(ability1Str);
+    for (auto& ability : p1Abilities) p1->addAbility(move(ability));
+
+    auto p2Abilities = AbilityFactory::createAbilities(ability2Str);
+    for (auto& ability : p2Abilities) p2->addAbility(move(ability));
+
+    if (!link1File.empty()) {
+        controller->loadLinksFromFile(link1File, p1, true);
+    } else {
+        generateDefaultLinks(p1, true);
+    }
+
+    if (!link2File.empty()) {
+        controller->loadLinksFromFile(link2File, p2, false);
+    } else {
+        generateDefaultLinks(p2, false);
+    }
+}
+
+void Game::generateDefaultLinks(Player* player, bool isPlayer1) {
+    vector<pair<LinkType,int>> configs = {
+        {LinkType::Virus, 1}, {LinkType::Data, 4},
+        {LinkType::Virus, 3}, {LinkType::Virus, 2},
+        {LinkType::Data, 3}, {LinkType::Virus, 4},
+        {LinkType::Data, 2}, {LinkType::Data, 1}
+    };
+
+    static random_device rd;
+    static mt19937 g(rd());
+    shuffle(configs.begin(), configs.end(), g);
+
+    char id = isPlayer1 ? 'a' : 'A';
+    for (const auto& cfg : configs) {
+        auto link = make_unique<Link>(id, cfg.first, cfg.second, player);
+        player->addLink(move(link));
+        ++id;
     }
 }

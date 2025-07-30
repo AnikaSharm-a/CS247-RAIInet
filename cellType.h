@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CELLTYPE_H
+#define CELLTYPE_H
 
 enum class CellType {
     Normal,
@@ -6,3 +7,5 @@ enum class CellType {
     ServerPort,
     Fog
 };
+
+#endif // CELLTYPE_H

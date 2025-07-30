@@ -53,6 +53,12 @@ public:
     void applyFogEffect(int row, int col, int ownerId);
     void removeFogEffect();
     void updateFog();
+    
+    // Player setup methods
+    void generateDefaultLinks(Player* player, bool isPlayer1);
+    void setupPlayers(Player* p1, Player* p2,
+                      const string& ability1Str, const string& ability2Str,
+                      const string& link1File, const string& link2File);
 };
 
 #endif // GAME_H
