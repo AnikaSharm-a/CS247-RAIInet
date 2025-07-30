@@ -1,9 +1,10 @@
 #include "board.h"
+#include "controller.h"
 #include <stdexcept>
 #include <iostream>
 using namespace std;
 
-Board::Board() {
+Board::Board() : controller(nullptr) {
     // All cells default to Normal unless setup otherwise
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
@@ -93,6 +94,13 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             outcome.affectedLink = moving;
             outcome.affectedLink->reveal();
             grid[r][c].removeLink(); // Remove from board
+            
+            // Notify about cell change and link movement
+            if (controller) {
+                controller->notifyCellChanged(r, c);
+                // controller->notifyLinkMoved(id);
+            }
+            
             outcome.success = true;
             outcome.result = MoveResult::DownloadedOffBoard;
             return outcome;
@@ -119,6 +127,9 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         } else {
             // Reveal the opponent link
             moving->reveal();
+            if (controller) {
+                controller->notifyLinkRevealed(id);
+            }
             
             // If it's a virus, download it immediately
             if (moving->getType() == LinkType::Virus) {
@@ -127,6 +138,13 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
                 if (virusOwner) {
                     // Remove the link from the board
                     src.removeLink();
+                    
+                    // Notify about cell change and link movement
+                    if (controller) {
+                        controller->notifyCellChanged(r, c);
+                        // controller->notifyLinkMoved(id);
+                    }
+                    
                     outcome.success = true;
                     outcome.result = MoveResult::DownloadedByFirewall;
                     outcome.affectedLink = moving;
@@ -154,11 +172,21 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             } else {
                 // Reveal the attacker link
                 moving->reveal();
+                if (controller) {
+                    controller->notifyLinkRevealed(id);
+                }
                 
                 // If attacker is a virus, download it immediately
                 if (moving->getType() == LinkType::Virus) {
                     // Remove the attacker from the board
                     src.removeLink();
+                    
+                    // Notify about cell change and link movement
+                    if (controller) {
+                        controller->notifyCellChanged(r, c);
+                        // controller->notifyLinkMoved(id);
+                    }
+                    
                     outcome.success = true;
                     outcome.result = MoveResult::DownloadedByFirewall;
                     outcome.affectedLink = moving;
@@ -175,6 +203,13 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             dest.setLink(moving);
             src.removeLink();
 
+            // Notify about cell changes and link movement
+            if (controller) {
+                controller->notifyCellChanged(r, c);
+                controller->notifyCellChanged(nr, nc);
+                // controller->notifyLinkMoved(id);
+            }
+
             outcome.success = true;
             outcome.result = MoveResult::BattleWon;
             outcome.affectedLink = defender;
@@ -182,6 +217,12 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         } else {
             // Defender wins, attacker is removed
             src.removeLink();
+
+            // Notify about cell change and link movement
+            if (controller) {
+                controller->notifyCellChanged(r, c);
+                // controller->notifyLinkMoved(id);
+            }
 
             outcome.success = true;
             outcome.result = MoveResult::BattleLost;
@@ -203,6 +244,14 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             outcome.affectedLink->reveal();
             src.removeLink();        // remove from source
             dest.removeLink();       // ensure dest is empty
+            
+            // Notify about cell changes and link movement
+            if (controller) {
+                controller->notifyCellChanged(r, c);
+                controller->notifyCellChanged(nr, nc); // TODO: check if this is correct
+                // controller->notifyLinkMoved(id);
+            }
+            
             outcome.success = true;
             outcome.result = MoveResult::DownloadedOnServerPort;
             return outcome;
@@ -211,6 +260,13 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         // Empty destination cell
         dest.setLink(moving);
         src.removeLink();
+
+        // Notify about cell changes and link movement
+        if (controller) {
+            controller->notifyCellChanged(r, c);
+            controller->notifyCellChanged(nr, nc);
+            // controller->notifyLinkMoved(id);
+        }
 
         outcome.success = true;
         outcome.result = MoveResult::Moved;
@@ -229,4 +285,9 @@ void Board::addFirewall(int row, int col, Player* player) {
     
     // Set the cell type to Firewall and store the player ID
     grid[row][col] = Cell(CellType::Firewall, player->getId());
+    
+    // Notify about cell change
+    if (controller) {
+        controller->notifyCellChanged(row, col);
+    }
 }

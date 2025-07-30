@@ -4,6 +4,9 @@
 #include <vector>
 using namespace std;
 
+// Forward declaration
+class Controller;
+
 // Move result enums and struct
 enum class MoveResult {
     Invalid,
@@ -29,6 +32,7 @@ enum class Direction { Up, Down, Left, Right };
 
 class Board {
     Cell grid[8][8];
+    Controller* controller;  // Reference to controller for notifications
 
 public:
     Board();
@@ -41,4 +45,7 @@ public:
     // Methods needed for abilities
     bool isServerPort(int row, int col) const;
     void addFirewall(int row, int col, Player* player);
+    
+    // Setter for controller reference
+    void setController(Controller* c) { controller = c; }
 };

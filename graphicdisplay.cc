@@ -8,7 +8,7 @@
 #include <algorithm>
 using namespace std;
 
-GraphicDisplay::GraphicDisplay(int gridSize, int width, int height) : xw{width, height}, gridSize{gridSize} {
+GraphicDisplay::GraphicDisplay(int gridSize, int width, int height) : xw{width, height}, gridSize{gridSize}, gameRef(nullptr) {
     cellWidth = (width - 10) / gridSize;
     cellHeight = (height - 200) / gridSize; // 62.5 is the hardcoded value
     lastDrawn.assign(gridSize, vector<DrawnState>(gridSize, DrawnState{' ', false, false, LinkType::Data, false, false}));
@@ -41,6 +41,13 @@ GraphicDisplay::GraphicDisplay(int gridSize, int width, int height) : xw{width, 
     for (int r = 0; r < gridSize; ++r) {
         int y = offsetY + r * cellHeight + cellHeight / 2;
         xw.drawString(3, y, to_string(r));
+    }
+}
+
+void GraphicDisplay::notify(const NotificationData& data) {
+    // Redraw the entire display when we receive any notification
+    if (gameRef) {
+        print(*gameRef, cout);
     }
 }
 
@@ -85,7 +92,7 @@ void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) 
         Player *owner = link->getOwner();
         bool visible = (owner == p1 || link->isRevealed());
 
-        // Select background color just for the link’s "highlight"
+        // Select background color just for the link's "highlight"
         if (link->isJammed()) bgColor = Xwindow::Purple;
         else if (visible && link->getType() == LinkType::Data) bgColor = Xwindow::Green;
         else if (visible && link->getType() == LinkType::Virus) bgColor = Xwindow::Red;

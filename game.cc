@@ -33,11 +33,29 @@ int Game::getCurrentPlayerIdx() const { return currentPlayerIdx; }
 bool Game::isGameOver() const { return gameOver; }
 Controller* Game::getController() { return controller; }
 int Game::getCurrentTurn() const { return turnNumber; }
-void Game::setTurnNumber(int t) { turnNumber = t; }
+void Game::setTurnNumber(int t) { 
+    turnNumber = t; 
+    if (controller && notificationsEnabled) {
+        controller->notifyGameStateChanged();
+    }
+}
 
-void Game::setCurrentPlayerIdx(int idx) { currentPlayerIdx = idx; }
-void Game::setGameOver(bool over) { gameOver = over; }
-void Game::setController(Controller* c) { controller = c; }
+void Game::setCurrentPlayerIdx(int idx) { 
+    currentPlayerIdx = idx; 
+    if (controller && notificationsEnabled) {
+        controller->notifyGameStateChanged();
+    }
+}
+void Game::setGameOver(bool over) { 
+    gameOver = over; 
+    if (over && controller && notificationsEnabled) {
+        controller->notifyGameStateChanged();
+    }
+}
+void Game::setController(Controller* c) { 
+    controller = c; 
+    notificationsEnabled = true; // Enable notifications once controller is set
+}
 const map<pair<int, int>, pair<CellType, vector<pair<int, int>>>>& Game::getFoggedCells() const { return foggedCells; }
 
 void Game::addPlayer(unique_ptr<Player> player) {
@@ -64,9 +82,15 @@ void Game::setupLinksForPlayer(Player* p, bool isPlayer1) {
         board.at(6,3).setLink(p->getLink('D'));
         board.at(6,4).setLink(p->getLink('E'));
     }
+    
+    // Don't notify during setup - we'll notify once at the end of startGame
 }
 
 void Game::startGame() {
+    // Temporarily disable notifications during initialization
+    bool wasEnabled = notificationsEnabled;
+    notificationsEnabled = false;
+    
     currentPlayerIdx = 0;
     gameOver = false;
     turnNumber = 0; // Initialize turn number
@@ -76,6 +100,12 @@ void Game::startGame() {
     // Place links already created for each player on the board
     setupLinksForPlayer(players[0].get(), true);
     setupLinksForPlayer(players[1].get(), false);
+    
+    // Re-enable notifications and send one notification after all setup is complete
+    notificationsEnabled = wasEnabled;
+    if (controller) {
+        controller->notifyGameStateChanged();
+    }
 }
 
 bool Game::checkVictory() {
@@ -83,6 +113,9 @@ bool Game::checkVictory() {
         if (p->hasWon()) {
             cout << "Player " << p->getId() << " wins by downloading 4 data!\n";
             gameOver = true;
+            if (controller) {
+                controller->notifyGameStateChanged();
+            }
             return true;
         }
         if (p->hasLost()) {
@@ -92,6 +125,9 @@ bool Game::checkVictory() {
             cout << "Player " << loserId << " loses by downloading 4 viruses!\n";
             cout << "Player " << winnerId << " wins!\n";
             gameOver = true;
+            if (controller) {
+                controller->notifyGameStateChanged();
+            }
             return true;
         }
     }
@@ -105,6 +141,13 @@ Player* Game::getOpponentPlayer() {
 
 void Game::download(Link* link, Player* targetPlayer) {
     targetPlayer->incrementDownload(link);
+    
+    // Notify about the download
+    if (link && controller) {
+        controller->notifyLinkDownloaded(link->getId());
+        controller->notifyPlayerChanged(targetPlayer->getId());
+    }
+    
     checkVictory();
 }
 
@@ -128,6 +171,11 @@ bool Game::playerMove(char id, Direction dir) {
         return false;
     }
 
+    // Notify about the link movement
+    // if (controller) {
+    //     controller->notifyLinkMoved(id);
+    // }
+    
     // Handle downloads or battles based on outcome:
     switch (outcome.result) {
         case MoveResult::Moved:
@@ -181,6 +229,10 @@ bool Game::playerMove(char id, Direction dir) {
             break;
         case MoveResult::Invalid:
             break;
+    }
+
+    if (controller) {
+        controller->notifyLinkMoved(id);
     }
 
     checkVictory();
@@ -273,6 +325,14 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
     try {
         ability->use(this, player, row, col);
         player->markAbilityUsed(abilityId);
+        
+        // Notify about ability usage and player state change
+        if (controller) {
+            controller->notifyPlayerChanged(player->getId());
+            cout << "Notifying cell changed " << row << " " << col << endl;
+            controller->notifyCellChanged(row, col);
+        }
+        
         cout << "Used " << abilityName << " successfully.\n";
     } catch (const exception& e) {
         throw invalid_argument(string("Ability failed: ") + e.what());
@@ -301,7 +361,17 @@ void Game::applyFogEffect(int row, int col, int ownerId) {
                 foggedCells[coord].second.push_back(make_pair(turnNumber, ownerId));
                 cell.setType(CellType::Fog);
             }
+            
+            // Notify about cell change
+            if (controller) {
+                controller->notifyCellChanged(r, c);
+            }
         }
+    }
+    
+    // Notify about board change
+    if (controller) {
+        controller->notifyBoardChanged();
     }
 }
 
@@ -315,9 +385,19 @@ void Game::removeFogEffect() {
         // Get the original cell type
         CellType originalType = entry.second.first;
         board->at(r, c).setType(originalType);
+        
+        // Notify about cell change
+        if (controller) {
+            controller->notifyCellChanged(r, c);
+        }
     }
 
     foggedCells.clear();
+
+    // Notify about board change
+    if (controller) {
+        controller->notifyBoardChanged();
+    }
 
     cout << "Fog effect removed and cells restored.\n";
 }
@@ -351,6 +431,16 @@ void Game::updateFog() {
             CellType originalType = fogEntry.first;
             board->at(coord.first, coord.second).setType(originalType);
             foggedCells.erase(coord);
+            
+            // Notify about cell change
+            if (controller) {
+                controller->notifyCellChanged(coord.first, coord.second);
+            }
         }
+    }
+    
+    // Notify about board change if any cells were updated
+    if (!cellsToCheck.empty() && controller) {
+        controller->notifyBoardChanged();
     }
 }

@@ -8,12 +8,15 @@
 #include <vector>
 using namespace std;
 
+class Game;  // Forward declaration
+
 class GraphicDisplay : public View {
     mutable Xwindow xw;
     int gridSize;
     int cellWidth;
     int cellHeight;
     int margin = 4;
+    Game* gameRef;  // Reference to the game for redrawing
 
     // Keep a snapshot of last drawn characters to allow partial redraw
     struct DrawnState {
@@ -35,6 +38,12 @@ class GraphicDisplay : public View {
 
 public:
     GraphicDisplay(int gridSize, int width = 500, int height = 500);
+
+    // Observer pattern notification method
+    void notify(const NotificationData& data) override;
+
+    // Set the game reference
+    void setGameRef(Game* game) { gameRef = game; }
 
     // Unused in this approach, but left for completeness
     // void notify(int row, int col, CellType state) override;

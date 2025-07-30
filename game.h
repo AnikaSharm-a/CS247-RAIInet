@@ -17,6 +17,7 @@ class Game {
     bool gameOver;
     Controller* controller;
     int turnNumber; // Track the current turn number
+    bool notificationsEnabled; // Flag to control notifications during initialization
     // Map from cell coordinates to pair of (originalType, vector of fog effects (appliedTurn, ownerId))
     std::map<std::pair<int, int>, std::pair<CellType, std::vector<std::pair<int, int>>>> foggedCells;
 
