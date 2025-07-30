@@ -144,9 +144,7 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
         }
 
         bool success = game->playerMove(id, dir);
-        if (!success) {
-            cout << "Invalid move" << endl;
-        } else {
+        if (success) {
             moved = true;
         }
     }

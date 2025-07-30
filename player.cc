@@ -10,22 +10,22 @@ int Player::getId() const {
     return id;
 }
 
-map<char, std::shared_ptr<Link>>& Player::getLinks() {
-    static map<char, std::shared_ptr<Link>> linkPtrs;
+map<char, shared_ptr<Link>>& Player::getLinks() {
+    static map<char, shared_ptr<Link>> linkPtrs;
     linkPtrs.clear();
     for (auto& entry : links) {
         // Create shared_ptr from unique_ptr for external access
-        linkPtrs[entry.first] = std::shared_ptr<Link>(entry.second.get(), [](Link*){});
+        linkPtrs[entry.first] = shared_ptr<Link>(entry.second.get(), [](Link*){});
     }
     return linkPtrs;
 }
 
-const map<char, std::shared_ptr<Link>>& Player::getLinks() const {
-    static map<char, std::shared_ptr<Link>> linkPtrs;
+const map<char, shared_ptr<Link>>& Player::getLinks() const {
+    static map<char, shared_ptr<Link>> linkPtrs;
     linkPtrs.clear();
     for (const auto& entry : links) {
         // Create shared_ptr from unique_ptr for external access
-        linkPtrs[entry.first] = std::shared_ptr<Link>(entry.second.get(), [](Link*){});
+        linkPtrs[entry.first] = shared_ptr<Link>(entry.second.get(), [](Link*){});
     }
     return linkPtrs;
 }
@@ -60,9 +60,9 @@ void Player::addLink(unique_ptr<Link> link) {
     links[id] = move(link);
 }
 
-std::shared_ptr<Link> Player::getLink(char id) const {
+shared_ptr<Link> Player::getLink(char id) const {
     auto it = links.find(id);
-    return it != links.end() ? std::shared_ptr<Link>(it->second.get(), [](Link*){}) : nullptr;
+    return it != links.end() ? shared_ptr<Link>(it->second.get(), [](Link*){}) : nullptr;
 }
 
 void Player::removeLink(char id) {
@@ -73,10 +73,10 @@ bool Player::ownsLink(char id) const {
     return links.find(id) != links.end();
 }
 
-vector<std::shared_ptr<Link>> Player::getAllLinks() const {
-    vector<std::shared_ptr<Link>> all;
+vector<shared_ptr<Link>> Player::getAllLinks() const {
+    vector<shared_ptr<Link>> all;
     for (const auto& entry : links) {
-        all.push_back(std::shared_ptr<Link>(entry.second.get(), [](Link*){}));
+        all.push_back(shared_ptr<Link>(entry.second.get(), [](Link*){}));
     }
     return all;
 }
@@ -103,11 +103,11 @@ int Player::getNumUnusedAbilities() const {
 
 void Player::incrementDownload(Link* link) {
     if (!link) return;
-    if (link->getType() == LinkType::Data) { downloadedData++;
-    cout << "======debug print incrementing data" << endl;
+    if (link->getType() == LinkType::Data) { 
+        downloadedData++;
     }
-    else { downloadedVirus++;
-    cout << "======debug print incrementing virus" << endl;
+    else { 
+        downloadedVirus++;
     }
 }
 

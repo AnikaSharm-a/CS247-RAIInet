@@ -354,7 +354,7 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
         
         cout << "Used " << abilityName << " successfully.\n";
     } catch (const exception& e) {
-        throw invalid_argument(string("Ability failed: ") + e.what());
+        throw invalid_argument(e.what());
     }
 }
 
