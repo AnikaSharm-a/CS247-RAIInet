@@ -4,6 +4,7 @@
 #include "cell.h"
 #include "link.h"
 #include <vector>
+#include <memory>
 using namespace std;
 
 // Forward declaration
@@ -24,8 +25,8 @@ enum class MoveResult {
 struct MoveOutcome {
     bool success = false;
     MoveResult result = MoveResult::Invalid;
-    Link* movedLink = nullptr;     // The link that moved
-    Link* affectedLink = nullptr;  // The link that was captured/downloaded (if any)
+    std::shared_ptr<Link> movedLink = nullptr;     // The link that moved
+    std::shared_ptr<Link> affectedLink = nullptr;  // The link that was captured/downloaded (if any)
     int destRow = -1;
     int destCol = -1;
 };

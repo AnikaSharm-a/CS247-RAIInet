@@ -45,7 +45,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
     // Show links for Player 1 depending on whether current player is Player 1
     for (const auto& pair : p1->getLinks()) {
         char id = pair.first;
-        Link* link = pair.second;
+        auto link = pair.second;
         if (current == p1) {
             // Current player sees all own links fully
             string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
@@ -93,7 +93,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
                 // else fallthrough to show normal content only if player owns all fog
             }
             if (!cell.isEmpty()) {
-                Link* link = cell.getLink();
+                auto link = cell.getLink();
                 Player* owner = link->getOwner();
 
                 if (owner == p1) {
@@ -125,7 +125,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
 
     for (const auto& pair : p2->getLinks()) {
         char id = pair.first;
-        Link* link = pair.second;
+        auto link = pair.second;
         if (current == p2) {
             // Current player sees own links fully
             string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");

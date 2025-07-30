@@ -10,20 +10,22 @@ int Player::getId() const {
     return id;
 }
 
-map<char, Link*>& Player::getLinks() {
-    static map<char, Link*> linkPtrs;
+map<char, std::shared_ptr<Link>>& Player::getLinks() {
+    static map<char, std::shared_ptr<Link>> linkPtrs;
     linkPtrs.clear();
     for (auto& entry : links) {
-        linkPtrs[entry.first] = entry.second.get();
+        // Create shared_ptr from unique_ptr for external access
+        linkPtrs[entry.first] = std::shared_ptr<Link>(entry.second.get(), [](Link*){});
     }
     return linkPtrs;
 }
 
-const map<char, Link*>& Player::getLinks() const {
-    static map<char, Link*> linkPtrs;
+const map<char, std::shared_ptr<Link>>& Player::getLinks() const {
+    static map<char, std::shared_ptr<Link>> linkPtrs;
     linkPtrs.clear();
     for (const auto& entry : links) {
-        linkPtrs[entry.first] = entry.second.get();
+        // Create shared_ptr from unique_ptr for external access
+        linkPtrs[entry.first] = std::shared_ptr<Link>(entry.second.get(), [](Link*){});
     }
     return linkPtrs;
 }
@@ -58,9 +60,9 @@ void Player::addLink(unique_ptr<Link> link) {
     links[id] = move(link);
 }
 
-Link* Player::getLink(char id) const {
+std::shared_ptr<Link> Player::getLink(char id) const {
     auto it = links.find(id);
-    return it != links.end() ? it->second.get() : nullptr;
+    return it != links.end() ? std::shared_ptr<Link>(it->second.get(), [](Link*){}) : nullptr;
 }
 
 void Player::removeLink(char id) {
@@ -71,22 +73,21 @@ bool Player::ownsLink(char id) const {
     return links.find(id) != links.end();
 }
 
-vector<Link*> Player::getAllLinks() const {
-    vector<Link*> all;
+vector<std::shared_ptr<Link>> Player::getAllLinks() const {
+    vector<std::shared_ptr<Link>> all;
     for (const auto& entry : links) {
-        auto link = entry.second.get();
-        all.push_back(link);
+        all.push_back(std::shared_ptr<Link>(entry.second.get(), [](Link*){}));
     }
     return all;
 }
 
 void Player::revealLink(char id) {
-    Link* link = getLink(id);
+    auto link = getLink(id);
     if (link) link->reveal();
 }
 
 bool Player::isLinkRevealed(char id) const {
-    Link* link = getLink(id);
+    auto link = getLink(id);
     return link ? link->isRevealed() : false;
 }
 

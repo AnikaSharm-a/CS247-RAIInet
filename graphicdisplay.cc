@@ -88,7 +88,7 @@ void GraphicDisplay::drawCell(int r, int c, const Cell &cell, const Player *p1) 
 
     // --- 3. If there is a link, draw it ON TOP of whatever background was drawn ---
     if (!cell.isEmpty()) {
-        Link *link = cell.getLink();
+        auto link = cell.getLink();
         Player *owner = link->getOwner();
         bool visible = (owner == p1 || link->isRevealed());
 
@@ -132,7 +132,7 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
     p1Stream << "Abilities: " << p1->getNumUnusedAbilities() << "\n";
 
     for (char id = 'a'; id <= 'h'; ++id) {
-        auto *link = p1->getLink(id);
+        auto link = p1->getLink(id);
         if (!link) continue;
         p1Stream << id << ": "
                  << (link->getType() == LinkType::Data ? "D" : "V")
@@ -179,7 +179,7 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
                 newState.symbol = '?';
             }
             else if (!cell.isEmpty()) {
-                Link *link = cell.getLink();
+                auto link = cell.getLink();
                 Player *owner = link->getOwner();
                 bool visible = (owner == p1 || link->isRevealed());
 
@@ -231,7 +231,7 @@ void GraphicDisplay::print(const Game &game, ostream &out) const {
     p2Stream << "Abilities: " << p2->getNumUnusedAbilities() << "\n";
 
     for (char id = 'A'; id <= 'H'; ++id) {
-        auto *link = p2->getLink(id);
+        auto link = p2->getLink(id);
         if (!link) continue;
         if (link->isRevealed()) {
             p2Stream << id << ": "

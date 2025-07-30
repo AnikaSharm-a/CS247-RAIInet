@@ -24,7 +24,7 @@ class Game {
 public:
     void startGame();
     bool checkVictory();
-    void download(Link* link, Player* targetPlayer);
+    void download(std::shared_ptr<Link> link, Player* targetPlayer);
     void useAbility(Player* player, int abilityId, char args[]);
 
     Board* getBoard();

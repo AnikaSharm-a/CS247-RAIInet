@@ -25,8 +25,8 @@ public:
 
     // Getters
     int getId() const;
-    map<char, Link*>& getLinks();
-    const map<char, Link*>& getLinks() const;
+    map<char, std::shared_ptr<Link>>& getLinks();
+    const map<char, std::shared_ptr<Link>>& getLinks() const;
     set<int>& getUsedAbilities();
     int getDownloadedVirus() const;
     int getDownloadedData() const;
@@ -35,10 +35,11 @@ public:
 
     // Link management
     void addLink(unique_ptr<Link> link);
-    Link* getLink(char id) const;
+    std::shared_ptr<Link> getLink(char id) const;
+    Link* getLinkRaw(char id) const { return getLink(id).get(); }  // For backward compatibility
     void removeLink(char id);
     bool ownsLink(char id) const;
-    vector<Link*> getAllLinks() const;
+    vector<std::shared_ptr<Link>> getAllLinks() const;
 
     // Reveal
     void revealLink(char id);

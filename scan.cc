@@ -19,7 +19,7 @@ void Scan::use(Game* game,
     if (cell.isEmpty())
         throw invalid_argument("Scan: no link at target cell");
 
-    Link* link = cell.getLink();
+    auto link = cell.getLink();
     // Allow scanning any link on the field
     // For own links, we can scan them but they won't be revealed
     // For opponent links, reveal them

@@ -29,7 +29,7 @@ void AreaScan::use(Game* game,
         throw invalid_argument("AreaScan: no link at specified position");
     }
     
-    Link* link = cell.getLink();
+    auto link = cell.getLink();
     if (link->getOwner() != player) {
         throw invalid_argument("AreaScan: can only scan around your own link");
     }
@@ -40,7 +40,7 @@ void AreaScan::use(Game* game,
         for (int c = max(0, col - 1); c <= min(7, col + 1); ++c) {
             Cell& scanCell = board->at(r, c);
             if (!scanCell.isEmpty()) {
-                Link* scanLink = scanCell.getLink();
+                auto scanLink = scanCell.getLink();
                 // Reveal opponent links only
                 if (scanLink->getOwner() != player) {
                     scanLink->reveal();

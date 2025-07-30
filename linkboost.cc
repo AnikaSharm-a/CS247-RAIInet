@@ -21,7 +21,7 @@ void LinkBoost::use(Game* game,
     if (cell.isEmpty())
         throw invalid_argument("LinkBoost: no link at target cell");
 
-    Link* link = cell.getLink();
+    auto link = cell.getLink();
     if (link->getOwner() != player)
         throw invalid_argument("LinkBoost: can only boost your own link");
 

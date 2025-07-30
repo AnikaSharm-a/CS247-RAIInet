@@ -22,7 +22,7 @@ Board::Board() : controller(nullptr) {
 pair<int, int> Board::findLinkPosition(char id, Player* player) {
     for (int r = 0; r < 8; ++r) {
         for (int c = 0; c < 8; ++c) {
-            auto* link = grid[r][c].getLink();
+            auto link = grid[r][c].getLink();
             if (link && link->getId() == id) {
                 // Check ownership
                 if (link->getOwner() != player) {
@@ -58,12 +58,15 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         case Direction::Right: dc = 1; break;
     }
     
-    Link* moving = grid[r][c].getLink();
+    Link* moving = grid[r][c].getLinkRaw();
     if (!moving) {
         outcome.success = false;
         outcome.result = MoveResult::Invalid;
         return outcome;
     }
+    
+    // Get shared_ptr to the moving link
+    auto movingLink = grid[r][c].getLink();
     
     // Check if the link is jammed
     if (moving->isJammed()) {
@@ -90,8 +93,8 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             (player->getId() == 2 && nr < 0);
 
         if (offOpponentSide) {
-            outcome.movedLink = moving;
-            outcome.affectedLink = moving;
+            outcome.movedLink = movingLink;
+            outcome.affectedLink = movingLink;
             outcome.affectedLink->reveal();
             grid[r][c].removeLink(); // Remove from board
             
@@ -115,7 +118,7 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
     Cell& src = grid[r][c];
     Cell& dest = grid[nr][nc];
 
-    outcome.movedLink = moving;
+    outcome.movedLink = movingLink;
     outcome.destRow = nr;
     outcome.destCol = nc;
 
@@ -147,8 +150,8 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
                     
                     outcome.success = true;
                     outcome.result = MoveResult::DownloadedByFirewall;
-                    outcome.affectedLink = moving;
-                    outcome.movedLink = moving;
+                    outcome.affectedLink = movingLink;
+                    outcome.movedLink = movingLink;
                     return outcome;
                 }
             }
@@ -156,13 +159,15 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
     }
 
     if (!dest.isEmpty()) {
-        if (dest.getLink()->getOwner() == player) {
+        auto destLink = dest.getLink();
+        if (destLink->getOwner() == player) {
             outcome.success = false;
             outcome.result = MoveResult::Invalid;
             return outcome;
         }
 
-        Link* defender = dest.getLink();
+        auto defenderLink = dest.getLink();
+        Link* defender = defenderLink.get();
         
         // Check if defender is on a firewall and apply firewall effects before battle
         if (dest.getType() == CellType::Firewall) {
@@ -189,8 +194,8 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
                     
                     outcome.success = true;
                     outcome.result = MoveResult::DownloadedByFirewall;
-                    outcome.affectedLink = moving;
-                    outcome.movedLink = moving;
+                    outcome.affectedLink = movingLink;
+                    outcome.movedLink = movingLink;
                     return outcome;
                 }
             }
@@ -200,7 +205,7 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
 
         if (winner == moving) {
             // Moving link wins battle, replaces defender
-            dest.setLink(moving);
+            dest.setLink(movingLink);
             src.removeLink();
 
             // Notify about cell changes and link movement
@@ -212,7 +217,7 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
 
             outcome.success = true;
             outcome.result = MoveResult::BattleWon;
-            outcome.affectedLink = defender;
+            outcome.affectedLink = defenderLink;
             return outcome;
         } else {
             // Defender wins, attacker is removed
@@ -226,7 +231,7 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
 
             outcome.success = true;
             outcome.result = MoveResult::BattleLost;
-            outcome.affectedLink = moving;
+            outcome.affectedLink = movingLink;
             return outcome;
         }
     } else {
@@ -240,7 +245,7 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
 
         // Check for opponent's server port BEFORE placing the link
         if (dest.getType() == CellType::ServerPort && dest.getOwnerId() != player->getId()) {
-            outcome.affectedLink = moving;
+            outcome.affectedLink = movingLink;
             outcome.affectedLink->reveal();
             src.removeLink();        // remove from source
             dest.removeLink();       // ensure dest is empty
@@ -258,7 +263,7 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         }
 
         // Empty destination cell
-        dest.setLink(moving);
+        dest.setLink(movingLink);
         src.removeLink();
 
         // Notify about cell changes and link movement

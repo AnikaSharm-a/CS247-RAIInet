@@ -142,8 +142,8 @@ Player* Game::getOpponentPlayer() {
     return players[(currentPlayerIdx + 1) % players.size()].get();
 }
 
-void Game::download(Link* link, Player* targetPlayer) {
-    targetPlayer->incrementDownload(link);
+void Game::download(std::shared_ptr<Link> link, Player* targetPlayer) {
+    targetPlayer->incrementDownload(link.get());
     
     // Notify about the download
     if (link && controller) {
@@ -190,7 +190,7 @@ bool Game::playerMove(char id, Direction dir) {
             if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
                 outcome.affectedLink->removeBoost();
             }
-            currentPlayer->incrementDownload(outcome.affectedLink);
+            currentPlayer->incrementDownload(outcome.affectedLink.get());
             break;
         case MoveResult::BattleLost:
             // Opponent downloads current player's link
@@ -198,7 +198,7 @@ bool Game::playerMove(char id, Direction dir) {
             if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
                 outcome.affectedLink->removeBoost();
             }
-            opponent->incrementDownload(outcome.affectedLink);
+            opponent->incrementDownload(outcome.affectedLink.get());
             break;
         case MoveResult::DownloadedOffBoard:
             // Current player downloads their own link escaped off board
@@ -206,7 +206,7 @@ bool Game::playerMove(char id, Direction dir) {
             if (outcome.movedLink && outcome.movedLink->isBoosted()) {
                 outcome.movedLink->removeBoost();
             }
-            currentPlayer->incrementDownload(outcome.movedLink);
+            currentPlayer->incrementDownload(outcome.movedLink.get());
             break;
         case MoveResult::DownloadedOnServerPort:
             // Opponent downloads current player's link that moved onto their server port
@@ -214,7 +214,7 @@ bool Game::playerMove(char id, Direction dir) {
             if (outcome.movedLink && outcome.movedLink->isBoosted()) {
                 outcome.movedLink->removeBoost();
             }
-            opponent->incrementDownload(outcome.movedLink);
+            opponent->incrementDownload(outcome.movedLink.get());
             break;
         case MoveResult::DownloadedByFirewall:
             // Virus link was downloaded by firewall effect
@@ -226,7 +226,7 @@ bool Game::playerMove(char id, Direction dir) {
             if (outcome.affectedLink) {
                 Player* virusOwner = outcome.affectedLink->getOwner();
                 if (virusOwner) {
-                    virusOwner->incrementDownload(outcome.affectedLink);
+                    virusOwner->incrementDownload(outcome.affectedLink.get());
                 }
             }
             break;
@@ -243,7 +243,7 @@ bool Game::playerMove(char id, Direction dir) {
     // Unjam links that have been jammed for 2+ turns
     for (auto* p : getPlayers()) {
         for (auto& entry : p->getLinks()) {
-            Link* link = entry.second;
+            auto link = entry.second;
             if (link->isJammed() && link->getJammedOnTurn() <= turnNumber - 2) {
                 link->unjam();
             }
@@ -307,7 +307,7 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
         bool found = false;
         for (int r = 0; r < 8 && !found; ++r) {
             for (int c = 0; c < 8 && !found; ++c) {
-                auto* link = board.at(r, c).getLink();
+                auto link = board.at(r, c).getLink();
                 if (link && link->getId() == linkId) {
                     row = r;
                     col = c;

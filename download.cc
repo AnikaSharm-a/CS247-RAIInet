@@ -21,7 +21,7 @@ void Download::use(Game* game,
     if (cell.isEmpty())
         throw invalid_argument("Download: no link at target cell");
 
-    Link* link = cell.getLink();
+    auto link = cell.getLink();
     if (link->getOwner() == player)
         throw invalid_argument("Download: cannot download your own link");
 

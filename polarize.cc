@@ -19,7 +19,7 @@ void Polarize::use(Game* game,
     if (cell.isEmpty())
         throw invalid_argument("Polarize: no link at target cell");
 
-    Link* link = cell.getLink();
+    auto link = cell.getLink();
 
     // flip type, leave strength alone
     link->setType(link->getType() == LinkType::Data ? LinkType::Virus : LinkType::Data);
