@@ -19,12 +19,12 @@ TextDisplay::TextDisplay(int gridSize) : gameRef(nullptr), hasRedrawnThisTurn(fa
 void TextDisplay::notify(const NotificationData& data) {
     // Only redraw for link movements - this is the most important event
     if (gameRef && data.type == NotificationType::LinkMoved) {
-        cout << "\n"; // Add spacing for link movements
+        cout << endl; // Add spacing for link movements
         print(*gameRef, cout);
     }
     // For turn changes, just add spacing but don't redraw (since we already redrew for the move)
     else if (data.type == NotificationType::GameStateChanged) {
-        cout << "\n\n"; // Add extra spacing for turn changes
+        cout << endl; // Add extra spacing for turn changes
     }
     // Ignore all other notifications
 }
@@ -41,8 +41,8 @@ void TextDisplay::print(const Game &game, ostream &out) const {
     out << "\nPlayer 1:\n";
     out << "Downloaded: " << p1->getDownloadedData() << "D, " << p1->getDownloadedVirus() << "V\n";
     out << "Abilities: " << p1->getNumUnusedAbilities() << "\n";
-
     // Show links for Player 1 depending on whether current player is Player 1
+    int linkCount = 0;
     for (const auto& pair : p1->getLinks()) {
         char id = pair.first;
         auto link = pair.second;
@@ -59,8 +59,18 @@ void TextDisplay::print(const Game &game, ostream &out) const {
                 out << id << ": ? ";
             }
         }
+        
+        // Add newline after every 4 links
+        linkCount++;
+        if (linkCount == 4) {
+            out << "\n";
+        }
     }
-    out << "\n";
+    // Add final newline if we didn't just add one
+    if (linkCount % 4 != 0) {
+        out << "\n";
+    }
+    out << "\n"; // Add extra spacing before the board separator
 
     out << "========\n";
 
@@ -123,6 +133,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
     out << "Downloaded: " << p2->getDownloadedData() << "D, " << p2->getDownloadedVirus() << "V\n";
     out << "Abilities: " << p2->getNumUnusedAbilities() << "\n";
 
+    int linkCount2 = 0;
     for (const auto& pair : p2->getLinks()) {
         char id = pair.first;
         auto link = pair.second;
@@ -139,8 +150,18 @@ void TextDisplay::print(const Game &game, ostream &out) const {
                 out << id << ": ? ";
             }
         }
+        
+        // Add newline after every 4 links
+        linkCount2++;
+        if (linkCount2 == 4) {
+            out << "\n";
+        }
     }
-    out << "\n\n";
+    // Add final newline if we didn't just add one
+    if (linkCount2 % 4 != 0) {
+        out << "\n";
+    }
+    out << "\n";
 }
 
 

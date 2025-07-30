@@ -179,6 +179,9 @@ void Controller::play(istream &in) {
     while (!game->checkVictory() && in) {
         Player* currentPlayer = game->getPlayers()[game->getCurrentPlayerIdx()];
         cout << "Player " << (game->getCurrentPlayerIdx() + 1) << "'s turn:"<<endl;
+        
+        // Print the board at the start of each turn
+        view->print(*game, cout);
 
         bool abilityUsed = false;
         bool moved = false;
@@ -195,20 +198,7 @@ void Controller::play(istream &in) {
 
         if (game->checkVictory()) break;
 
-        // Turn management operations moved to Game::playerMove
-        // for (auto* p : game->getPlayers()) {
-        //     for (auto& entry : p->getLinks()) {
-        //         Link* link = entry.second;
-        //         if (link->isJammed() && link->getJammedOnTurn() <= game->getCurrentTurn() - 2) {
-        //             link->unjam();
-        //         }
-        //     }
-        // }
-
         game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
-        // game->updateFog();
-        // game->setTurnNumber(game->getCurrentTurn() + 1);
-        // Observer pattern will handle the display update automatically
     }
 }
 
