@@ -7,27 +7,22 @@
 #include <stdexcept>
 using namespace std;
 
-Download::Download()
-  : Ability("Download")
-{}
+Download::Download() : Ability("Download") {}
 
-void Download::use(Game* game,
-                   Player* player,
-                   int row,
-                   int col)
-{
+// immediately downloads the opponent's link at the specified position
+void Download::use(Game* game, Player* player, int row, int col){
     Board* board = game->getBoard();
     Cell& cell = board->at(row, col);
-    if (cell.isEmpty())
+    if (cell.isEmpty()){
         throw invalid_argument("Download: no link at target cell");
+    }
 
     auto link = cell.getLink();
-    if (link->getOwner() == player)
+    if (link->getOwner() == player){
         throw invalid_argument("Download: cannot download your own link");
-
-    // Remove the link from the board
-    cell.removeLink();
+    }
     
-    // delegate to Game's download logic so counters, removal, reveal, etc. happen
+    cell.removeLink();
+
     game->download(link, player);
 }

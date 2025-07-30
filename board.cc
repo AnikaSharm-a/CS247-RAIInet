@@ -4,27 +4,30 @@
 #include <iostream>
 using namespace std;
 
+//constructor initializes the board with default cells and server ports.
 Board::Board() : controller(nullptr) {
-    // All cells default to Normal unless setup otherwise
-    for (int r = 0; r < 8; ++r) {
-        for (int c = 0; c < 8; ++c) {
+    // all cells are Normal unless we specified otherwise in setup
+    for (int r = 0; r < 8; r++) {
+        for (int c = 0; c < 8; c++) {
             CellType type = CellType::Normal;
             int ownerId = -1;
             if ((r == 0 || r == 7) && (c == 3 || c == 4)) {
                 type = CellType::ServerPort;
-                ownerId = (r == 0 ? 1 : 2);
+                ownerId = (r == 0 ? 1 : 2); //player 1's server port is on top, player 2's is on bottom
             }
             grid[r][c] = Cell(type, ownerId);
         }
     }
 }
 
+// finds the position of a link on the board and validates ownership
+// helper for Link moving
 pair<int, int> Board::findLinkPosition(char id, Player* player) {
-    for (int r = 0; r < 8; ++r) {
-        for (int c = 0; c < 8; ++c) {
+    for (int r = 0; r < 8; r++) {
+        for (int c = 0; c < 8; c++) {
             auto link = grid[r][c].getLink();
             if (link && link->getId() == id) {
-                // Check ownership
+                // make sure that the link is owned by the current player
                 if (link->getOwner() != player) {
                     cout << "You cannot move link '" << id
                               << " - it belongs to the other player." << endl;
@@ -40,16 +43,16 @@ pair<int, int> Board::findLinkPosition(char id, Player* player) {
     return {-1, -1};
 }
 
+//move a link in the specified direction and returns the outcome
 MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
     MoveOutcome outcome;
     auto pos = findLinkPosition(id, player);
-    if (pos.first == -1) {
+    if (pos.first == -1) { //link not found
         outcome.success = false;
         outcome.result = MoveResult::Invalid;
         return outcome;
     }
-    int r = pos.first;
-    int c = pos.second;
+    int r = pos.first, c = pos.second;
     int dr = 0, dc = 0;
     switch (dir) {
         case Direction::Up: dr = -1; break;
@@ -58,58 +61,50 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         case Direction::Right: dc = 1; break;
     }
     
-    Link* moving = grid[r][c].getLinkRaw();
-    if (!moving) {
+    // get shared_ptr to the moving link
+    auto movingLink = grid[r][c].getLink();
+    if (!movingLink) {
         outcome.success = false;
         outcome.result = MoveResult::Invalid;
         return outcome;
     }
     
-    // Get shared_ptr to the moving link
-    auto movingLink = grid[r][c].getLink();
+    Link* moving = movingLink.get();
     
-    // Check if the link is jammed
+    // check if the link is jammed, can't move if it is
     if (moving->isJammed()) {
         outcome.success = false;
         outcome.result = MoveResult::Jammed;
         return outcome;
     }
     
-    // Determine movement distance based on whether link is boosted
-    int moveDistance = moving->isBoosted() ? 2 : 1;
+    int moveDistance = moving->isBoosted() ? 2 : 1; //boosted links move 2 spaces, normal links move 1 space
     
-    // Calculate destination coordinates
+    // calculate destination coordinates
     int nr = r + (dr * moveDistance);
     int nc = c + (dc * moveDistance);
     
-    // Check if the move would go out of bounds
+    // check if the move would go out of bounds
     if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) {
-        // Allow moving off the opponent's side (download)
-        // Conditions:
-        // - Player 1 moves upwards out of row 0
-        // - Player 2 moves downwards out of row 7
-        bool offOpponentSide =
-            (player->getId() == 1 && nr >= 8) ||
-            (player->getId() == 2 && nr < 0);
-
+        // allowed to move off the opponent's side.
+        bool offOpponentSide = (player->getId() == 1 && nr >= 8) ||(player->getId() == 2 && nr < 0);
+        
+        // if the link is moved off the opponent's side, it is downloaded
         if (offOpponentSide) {
             outcome.movedLink = movingLink;
             outcome.affectedLink = movingLink;
             outcome.affectedLink->reveal();
-            grid[r][c].removeLink(); // Remove from board
+            grid[r][c].removeLink(); // remove from board
             
-            // Notify about cell change and link movement
-            if (controller) {
-                controller->notifyCellChanged(r, c);
-                // controller->notifyLinkMoved(id);
-            }
+            // notify about cell change and link movement
+            controller->notifyCellChanged(r, c);
             
             outcome.success = true;
             outcome.result = MoveResult::DownloadedOffBoard;
             return outcome;
         }
 
-        // Any other out-of-bounds is invalid
+        // any other out-of-bounds is invalid
         outcome.success = false;
         outcome.result = MoveResult::Invalid;
         return outcome;
@@ -122,44 +117,32 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
     outcome.destRow = nr;
     outcome.destCol = nc;
 
-    // Check if destination has a firewall and apply firewall effects
+    // check if destination has a firewall and apply firewall effects
     if (dest.getType() == CellType::Firewall) {
-        // If the moving link is owned by the firewall owner, no effect
-        if (dest.getOwnerId() == player->getId()) {
-            // No firewall effect for owner's links
-        } else {
-            // Reveal the opponent link
+        // firewall only has effect on opponent's links
+        if (dest.getOwnerId() != player->getId()) {
             moving->reveal();
-            if (controller) {
-                controller->notifyLinkRevealed(id);
-            }
             
-            // If it's a virus, download it immediately
+            // if it's a virus, download it immediately before battle
             if (moving->getType() == LinkType::Virus) {
-                // Find the virus owner and download it
-                Player* virusOwner = moving->getOwner();
-                if (virusOwner) {
-                    // Remove the link from the board
-                    src.removeLink();
-                    
-                    // Notify about cell change and link movement
-                    if (controller) {
-                        controller->notifyCellChanged(r, c);
-                        // controller->notifyLinkMoved(id);
-                    }
-                    
-                    outcome.success = true;
-                    outcome.result = MoveResult::DownloadedByFirewall;
-                    outcome.affectedLink = movingLink;
-                    outcome.movedLink = movingLink;
-                    return outcome;
-                }
+                // remove the link from the board
+                src.removeLink();
+                
+                // notify about cell change
+                controller->notifyCellChanged(r, c);
+                
+                outcome.success = true;
+                outcome.result = MoveResult::DownloadedByFirewall;
+                outcome.affectedLink = movingLink;
+                outcome.movedLink = movingLink;
+                return outcome;
             }
         }
     }
 
     if (!dest.isEmpty()) {
         auto destLink = dest.getLink();
+        // can't move on top of your own link
         if (destLink->getOwner() == player) {
             outcome.success = false;
             outcome.result = MoveResult::Invalid;
@@ -169,28 +152,16 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         auto defenderLink = dest.getLink();
         Link* defender = defenderLink.get();
         
-        // Check if defender is on a firewall and apply firewall effects before battle
+        // check if defender is on a firewall and apply firewall effects before battle
         if (dest.getType() == CellType::Firewall) {
-            // If the attacker is owned by the firewall owner, no effect
-            if (dest.getOwnerId() == player->getId()) {
-                // No firewall effect for owner's links
-            } else {
-                // Reveal the attacker link
+            if (dest.getOwnerId() != player->getId()) {
                 moving->reveal();
-                if (controller) {
-                    controller->notifyLinkRevealed(id);
-                }
+                controller->notifyLinkRevealed(id);
                 
-                // If attacker is a virus, download it immediately
+                // if attacker is a virus, download it immediately
                 if (moving->getType() == LinkType::Virus) {
-                    // Remove the attacker from the board
                     src.removeLink();
-                    
-                    // Notify about cell change and link movement
-                    if (controller) {
-                        controller->notifyCellChanged(r, c);
-                        // controller->notifyLinkMoved(id);
-                    }
+                    controller->notifyCellChanged(r, c);
                     
                     outcome.success = true;
                     outcome.result = MoveResult::DownloadedByFirewall;
@@ -204,30 +175,22 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
         Link* winner = moving->battle(defender);
 
         if (winner == moving) {
-            // Moving link wins battle, replaces defender
+            // moving link wins battle, replaces defender
             dest.setLink(movingLink);
             src.removeLink();
 
-            // Notify about cell changes and link movement
-            if (controller) {
-                controller->notifyCellChanged(r, c);
-                controller->notifyCellChanged(nr, nc);
-                // controller->notifyLinkMoved(id);
-            }
+            controller->notifyCellChanged(r, c);
+            controller->notifyCellChanged(nr, nc);
 
             outcome.success = true;
             outcome.result = MoveResult::BattleWon;
             outcome.affectedLink = defenderLink;
             return outcome;
         } else {
-            // Defender wins, attacker is removed
+            // defender wins, attacker is removed
             src.removeLink();
 
-            // Notify about cell change and link movement
-            if (controller) {
-                controller->notifyCellChanged(r, c);
-                // controller->notifyLinkMoved(id);
-            }
+            controller->notifyCellChanged(r, c);
 
             outcome.success = true;
             outcome.result = MoveResult::BattleLost;
@@ -235,43 +198,33 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
             return outcome;
         }
     } else {
-
-        // Prevent moving into own server port
+        // can't move into own server port
         if (dest.getType() == CellType::ServerPort && dest.getOwnerId() == player->getId()) {
             outcome.success = false;
             outcome.result = MoveResult::Invalid;
             return outcome;
         }
 
-        // Check for opponent's server port BEFORE placing the link
+        // check for opponent's server port BEFORE placing the link
         if (dest.getType() == CellType::ServerPort && dest.getOwnerId() != player->getId()) {
             outcome.affectedLink = movingLink;
             outcome.affectedLink->reveal();
-            src.removeLink();        // remove from source
-            dest.removeLink();       // ensure dest is empty
+            src.removeLink();//remove from source
+            dest.removeLink();
             
-            // Notify about cell changes and link movement
-            if (controller) {
-                controller->notifyCellChanged(r, c);
-                controller->notifyCellChanged(nr, nc); // TODO: check if this is correct
-                // controller->notifyLinkMoved(id);
-            }
+            controller->notifyCellChanged(r, c);
+            controller->notifyCellChanged(nr, nc);
             
             outcome.success = true;
             outcome.result = MoveResult::DownloadedOnServerPort;
             return outcome;
         }
 
-        // Empty destination cell
         dest.setLink(movingLink);
         src.removeLink();
 
-        // Notify about cell changes and link movement
-        if (controller) {
-            controller->notifyCellChanged(r, c);
-            controller->notifyCellChanged(nr, nc);
-            // controller->notifyLinkMoved(id);
-        }
+        controller->notifyCellChanged(r, c);
+        controller->notifyCellChanged(nr, nc);
 
         outcome.success = true;
         outcome.result = MoveResult::Moved;
@@ -279,20 +232,19 @@ MoveOutcome Board::moveLink(char id, Player* player, Direction dir) {
     }
 }
 
+//helper function check if the specified position is a server port
 bool Board::isServerPort(int row, int col) const {
     return (row == 0 || row == 7) && (col == 3 || col == 4);
 }
 
+// adds a firewall at the specified position
 void Board::addFirewall(int row, int col, Player* player) {
     if (row < 0 || row >= 8 || col < 0 || col >= 8) {
         throw invalid_argument("Firewall position out of bounds");
     }
     
-    // Set the cell type to Firewall and store the player ID
+    // set the cell type to Firewall and store the player ID
     grid[row][col] = Cell(CellType::Firewall, player->getId());
     
-    // Notify about cell change
-    if (controller) {
-        controller->notifyCellChanged(row, col);
-    }
+    controller->notifyCellChanged(row, col);
 }

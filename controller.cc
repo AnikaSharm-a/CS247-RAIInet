@@ -11,22 +11,20 @@
 #include <cstring>
 #include <algorithm>
 #include <random>
-#include "abilityFactory.h"
 #include "linkType.h"
 
 using namespace std;
 
-Controller::Controller(unique_ptr<View> view, unique_ptr<Game> game)
-    : view(move(view)), game(move(game)) {
+Controller::Controller(unique_ptr<View> view, unique_ptr<Game> game) : view(move(view)), game(move(game)) {
     
-    // Register the main view as an observer
+    // attach the main view as an observer
     attachObserver(this->view.get());
     
-    // Set up controller references in Game and Board
+    // set up controller references in Game and Board
     this->game->setController(this);
     this->game->getBoard()->setController(this);
     
-    // Set game reference in views
+    // set game reference in views
     if (GraphicDisplay* gd = dynamic_cast<GraphicDisplay*>(this->view.get())) {
         gd->setGameRef(this->game.get());
     } else if (TextDisplay* td = dynamic_cast<TextDisplay*>(this->view.get())) {
@@ -34,7 +32,7 @@ Controller::Controller(unique_ptr<View> view, unique_ptr<Game> game)
     }
 }
 
-// Observer management methods
+// observer management methods
 void Controller::attachObserver(View* observer) {
     observers.push_back(observer);
 }
@@ -46,13 +44,14 @@ void Controller::detachObserver(View* observer) {
     }
 }
 
+// notifies all observers of a change
 void Controller::notifyObservers(const NotificationData& data) {
     for (auto observer : observers) {
         observer->notify(data);
     }
 }
 
-// Convenience notification methods
+// convenience notification methods for different types of events
 void Controller::notifyCellChanged(int row, int col) {
     notifyObservers(NotificationData(NotificationType::CellChanged, row, col));
 }
@@ -81,15 +80,13 @@ void Controller::notifyLinkDownloaded(char linkId) {
     notifyObservers(NotificationData(NotificationType::LinkDownloaded, linkId));
 }
 
+// parses and executes a single command, returns false if quit or game over
 bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPlayer, bool &moved, bool &abilityUsed) {
     if (cmd == "quit") {
         return false;
     }
 
     else if (cmd == "board") {
-        // With observer pattern, we don't need to explicitly call print
-        // The view will be notified of changes automatically
-        // But we can still call print for immediate display
         view->print(*game, cout);
     }
 
@@ -123,7 +120,7 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
         try {
             game->useAbility(currentPlayer, abilityId, args);
             abilityUsed = true;
-            // Observer pattern will handle the display update automatically
+            // observer pattern should handle display update automatically
         } catch (const exception& e) {
             cout << "Ability failed: " << e.what() << endl;
         }
@@ -134,7 +131,7 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
         in >> id >> dirStr;
 
         Direction dir;
-        if      (dirStr == "up") dir = Direction::Up;
+        if (dirStr == "up") dir = Direction::Up;
         else if (dirStr == "down") dir = Direction::Down;
         else if (dirStr == "left") dir = Direction::Left;
         else if (dirStr == "right") dir = Direction::Right;
@@ -159,9 +156,9 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
             bool cont = true;
             while (cont) {
                 string nextCmd;
-                if (!(fileIn >> nextCmd)) break;  // No more commands in file
+                if (!(fileIn >> nextCmd)) break;
                 cont = parseCommand(nextCmd, fileIn, currentPlayer, moved, abilityUsed);
-                if (!cont) return false;  // Propagate quit upwards
+                if (!cont) return false;
             }
         }
         return true;
@@ -174,19 +171,20 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
     return true;
 }
 
+// main game loop that handles turn management and player input
 void Controller::play(istream &in) {
-    // Loop until the game ends
+    // loop until the game ends
     while (!game->checkVictory() && in) {
         Player* currentPlayer = game->getPlayers()[game->getCurrentPlayerIdx()];
         cout << "Player " << (game->getCurrentPlayerIdx() + 1) << "'s turn:"<<endl;
         
-        // Print the board at the start of each turn
+        // print the board at the start of each turn
         view->print(*game, cout);
 
         bool abilityUsed = false;
         bool moved = false;
 
-        // Loop until the current player makes a valid move (turn ends after that)
+        // loop until the current player makes a valid move (turn ends after that)
         while (!moved && in) {
             string cmd;
             if (!(in >> cmd)) break; // end of file or stream
@@ -202,6 +200,7 @@ void Controller::play(istream &in) {
     }
 }
 
+// parses a string to determine the link type (Data or Virus)
 LinkType Controller::parseLinkType(const string& s) {
     if (s.empty()) throw invalid_argument("Empty link type.");
     if (s[0] == 'D') return LinkType::Data;
@@ -209,13 +208,15 @@ LinkType Controller::parseLinkType(const string& s) {
     throw invalid_argument("Invalid link type: " + s);
 }
 
+// parses a string to extract the strength value (1-4)
 int Controller::parseStrength(const string& s) {
-    if (s.length() < 2) throw invalid_argument("Link string too short.");
+    if (s.length() < 2) throw invalid_argument("Internal Error:Link string too short.");
     int strength = s[1] - '0';
-    if (strength < 1 || strength > 4) throw invalid_argument("Invalid strength: " + s);
+    if (strength < 1 || strength > 4) throw invalid_argument("Internal Error: Invalid strength: " + s);
     return strength;
 }
 
+// loads link configurations from a file for a player
 void Controller::loadLinksFromFile(const string& filename, Player* player, bool isPlayer1) {
     ifstream in(filename);
     if (!in) throw runtime_error("Failed to open link file: " + filename);
@@ -230,7 +231,7 @@ void Controller::loadLinksFromFile(const string& filename, Player* player, bool 
         throw runtime_error("Expected 8 links in file: " + filename);
     }
 
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; i++) {
         LinkType type = parseLinkType(tokens[i]);
         int strength = parseStrength(tokens[i]);
         char id = isPlayer1 ? ('a' + i) : ('A' + i);
@@ -238,4 +239,3 @@ void Controller::loadLinksFromFile(const string& filename, Player* player, bool 
         player->addLink(move(link));
     }
 }
-

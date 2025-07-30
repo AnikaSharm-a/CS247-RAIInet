@@ -7,10 +7,10 @@
 #include <string>
 #include <memory>
 #include "linkType.h"
+#include "ability.h"
 using namespace std;
 
 class Link;      // forward declare
-class Ability;   // forward declare
 
 class Player {
     int id;
@@ -36,7 +36,6 @@ public:
     // Link management
     void addLink(unique_ptr<Link> link);
     std::shared_ptr<Link> getLink(char id) const;
-    Link* getLinkRaw(char id) const { return getLink(id).get(); }  // For backward compatibility
     void removeLink(char id);
     bool ownsLink(char id) const;
     vector<std::shared_ptr<Link>> getAllLinks() const;

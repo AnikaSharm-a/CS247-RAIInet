@@ -3,8 +3,7 @@ using namespace std;
 
 Ability::Ability(const string& name): name(name){}
 
-Ability::~Ability() = default;
-
+// returns the name of the ability
 const string& Ability::getName() const {
     return name;
 }

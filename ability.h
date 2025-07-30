@@ -4,6 +4,7 @@
 #include <string>
 using namespace std;
 
+// forward declarations (avoid circular dependencies)
 class Game;
 class Player;
 
@@ -13,17 +14,12 @@ protected:
 
 public:
     explicit Ability(const string& name);
-    virtual ~Ability();
+    virtual ~Ability() = default;
 
-    /// Apply this ability.  You must pass in your Game context so that
-    /// downloads, reveals, board updates, etc. can be routed back into Game.
-    virtual void use(Game* game,
-                     Player* player,
-                     int row,
-                     int col) = 0;
+    // pure virtual function that all abilities must implement
+    virtual void use(Game* game, Player* player, int row, int col) = 0;
 
-    /// Human‐readable name (e.g. “LinkBoost”, “Firewall”, …)
     const string& getName() const;
 };
 
-#endif // ABILITY_H
+#endif

@@ -6,23 +6,19 @@
 #include <stdexcept>
 using namespace std;
 
-FireWall::FireWall()
-  : Ability("FireWall")
-{}
+FireWall::FireWall() : Ability("FireWall") {}
 
-void FireWall::use(Game* game,
-                   Player* player,
-                   int row,
-                   int col)
-{
+void FireWall::use(Game* game, Player* player,int row, int col){
     Board* board = game->getBoard();
     if (board->isServerPort(row, col))
         throw invalid_argument("FireWall: cannot place on server port");
 
     Cell& cell = board->at(row, col);
-    if (!cell.isEmpty())
+    if (!cell.isEmpty()){
         throw invalid_argument("FireWall: target cell not empty");
+    }
 
+    //Track thee firewall position
     firewallPositions.emplace(row, col);
     board->addFirewall(row, col, player);
 }

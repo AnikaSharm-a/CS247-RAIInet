@@ -30,7 +30,7 @@ public:
     Board* getBoard();
     const Board* getBoard() const;
     vector<Player*>& getPlayers();
-    const vector<Player*>& getPlayers() const; 
+    const vector<Player*>& getPlayers() const;
     int getCurrentPlayerIdx() const;
     bool isGameOver() const;
     Controller* getController();

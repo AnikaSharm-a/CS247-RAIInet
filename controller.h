@@ -17,9 +17,9 @@ enum class LinkType;
 class Controller {
     unique_ptr<View> view;
     unique_ptr<Game> game;
-    vector<View*> observers;  // List of observers to notify
+    vector<View*> observers;
 
-    // Returns false if quit or game over
+    // returns false if quit or game over
     bool parseCommand(const string &cmd, istream &in, Player* currentPlayer, bool &moved, bool &abilityUsed);
     static LinkType parseLinkType(const string& s);
     static int parseStrength(const string& s);
@@ -29,12 +29,11 @@ public:
     void play(istream &in);
     void loadLinksFromFile(const string& filename, Player* player, bool isPlayer1);
     
-    // Observer management
     void attachObserver(View* observer);
     void detachObserver(View* observer);
     void notifyObservers(const NotificationData& data);
     
-    // Convenience notification methods
+    // notification methods for different event types
     void notifyCellChanged(int row, int col);
     void notifyPlayerChanged(int playerId);
     void notifyGameStateChanged();
@@ -43,7 +42,6 @@ public:
     void notifyLinkRevealed(char linkId);
     void notifyLinkDownloaded(char linkId);
     
-    // Getter methods to access raw pointers (non-owning)
     Game* getGame() { return game.get(); }
     View* getView() { return view.get(); }
 };

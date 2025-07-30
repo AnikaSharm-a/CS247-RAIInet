@@ -7,8 +7,10 @@
 #include <stdexcept>
 using namespace std;
 
+// constructor sets the ability name
 Polarize::Polarize() : Ability("Polarize"){}
 
+// flips the type of a link from data to virus or vice versa
 void Polarize::use(Game* game,
                    Player* player,
                    int row,

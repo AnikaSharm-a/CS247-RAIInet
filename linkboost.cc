@@ -7,10 +7,12 @@
 #include <stdexcept>
 using namespace std;
 
+// constructor sets the ability name
 LinkBoost::LinkBoost()
   : Ability("LinkBoost")
 {}
 
+// applies a movement boost to the specified link
 void LinkBoost::use(Game* game,
                     Player* player,
                     int row,
@@ -25,6 +27,6 @@ void LinkBoost::use(Game* game,
     if (link->getOwner() != player)
         throw invalid_argument("LinkBoost: can only boost your own link");
 
-    // Mark it boosted so when it moves it can jump one extra square
+    // mark it boosted so when it moves it can jump one extra square
     link->boost();
 }
