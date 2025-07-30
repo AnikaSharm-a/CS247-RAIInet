@@ -17,6 +17,10 @@ void FireWall::use(Game* game, Player* player,int row, int col){
     if (!cell.isEmpty()){
         throw invalid_argument("FireWall: target cell not empty");
     }
+    
+    if (cell.getType() == CellType::Firewall) {
+        throw invalid_argument("FireWall: cell already has a firewall");
+    }
 
     //Track thee firewall position
     firewallPositions.emplace(row, col);
