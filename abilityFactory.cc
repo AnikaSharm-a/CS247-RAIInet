@@ -156,4 +156,4 @@ string AbilityFactory::getUsageInfo() {
            "- Valid codes: " + getValidAbilityCodes() + "\n"
            "- L: LinkBoost, F: Firewall, D: Download, S: Scan, P: Polarize, J: Jam, E: Fog, A: AreaScan\n"
            "- Examples: LFDSP (one of each), FFDDL (two firewalls, two downloads, one linkboost)";
-} 
+}
