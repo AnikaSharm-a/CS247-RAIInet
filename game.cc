@@ -10,8 +10,25 @@ using namespace std;
 // Accessors and mutators
 Board* Game::getBoard() { return &board; }
 const Board* Game::getBoard() const { return &board; }
-vector<Player*>& Game::getPlayers() { return players; }
-const vector<Player*>& Game::getPlayers() const { return players; }
+
+vector<Player*>& Game::getPlayers() { 
+    static vector<Player*> playerPtrs;
+    playerPtrs.clear();
+    for (auto& player : players) {
+        playerPtrs.push_back(player.get());
+    }
+    return playerPtrs;
+}
+
+const vector<Player*>& Game::getPlayers() const { 
+    static vector<Player*> playerPtrs;
+    playerPtrs.clear();
+    for (const auto& player : players) {
+        playerPtrs.push_back(player.get());
+    }
+    return playerPtrs;
+}
+
 int Game::getCurrentPlayerIdx() const { return currentPlayerIdx; }
 bool Game::isGameOver() const { return gameOver; }
 Controller* Game::getController() { return controller; }
@@ -22,6 +39,11 @@ void Game::setCurrentPlayerIdx(int idx) { currentPlayerIdx = idx; }
 void Game::setGameOver(bool over) { gameOver = over; }
 void Game::setController(Controller* c) { controller = c; }
 const map<pair<int, int>, pair<CellType, vector<pair<int, int>>>>& Game::getFoggedCells() const { return foggedCells; }
+
+void Game::addPlayer(unique_ptr<Player> player) {
+    players.push_back(move(player));
+}
+
 void Game::setupLinksForPlayer(Player* p, bool isPlayer1) {
     if (isPlayer1) {
         board.at(0,0).setLink(p->getLink('a'));
@@ -52,13 +74,13 @@ void Game::startGame() {
     // Only do setup if no links have been placed yet
     if (players.size() < 2) return;
     // Place links already created for each player on the board
-    setupLinksForPlayer(players[0], true);
-    setupLinksForPlayer(players[1], false);
+    setupLinksForPlayer(players[0].get(), true);
+    setupLinksForPlayer(players[1].get(), false);
 }
 
 
 bool Game::checkVictory() {
-    for (auto p : players) {
+    for (auto& p : players) {
         if (p->hasWon()) {
             cout << "Player " << p->getId() << " wins by downloading 4 data!\n";
             gameOver = true;
@@ -79,7 +101,7 @@ bool Game::checkVictory() {
 
 // Returns the opposing player (assuming 2 players)
 Player* Game::getOpponentPlayer() {
-    return players[(currentPlayerIdx + 1) % players.size()];
+    return players[(currentPlayerIdx + 1) % players.size()].get();
 }
 
 void Game::download(Link* link, Player* targetPlayer) {
@@ -89,7 +111,7 @@ void Game::download(Link* link, Player* targetPlayer) {
 
 // Handles the move command, coordinating board and player state
 bool Game::playerMove(char id, Direction dir) {
-    Player* currentPlayer = players[currentPlayerIdx];
+    Player* currentPlayer = players[currentPlayerIdx].get();
     Player* opponent = getOpponentPlayer();
 
     // Board::moveLink should return a MoveOutcome struct describing what happened.

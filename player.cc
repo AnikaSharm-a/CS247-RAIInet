@@ -11,11 +11,21 @@ int Player::getId() const {
 }
 
 map<char, Link*>& Player::getLinks() {
-    return links;
+    static map<char, Link*> linkPtrs;
+    linkPtrs.clear();
+    for (auto& entry : links) {
+        linkPtrs[entry.first] = entry.second.get();
+    }
+    return linkPtrs;
 }
 
 const map<char, Link*>& Player::getLinks() const {
-    return links;
+    static map<char, Link*> linkPtrs;
+    linkPtrs.clear();
+    for (const auto& entry : links) {
+        linkPtrs[entry.first] = entry.second.get();
+    }
+    return linkPtrs;
 }
 
 set<int>& Player::getUsedAbilities() {
@@ -37,19 +47,20 @@ int Player::getNumLinks() const {
 int Player::getStrengthSum() const {
     int total = 0;
     for (const auto& entry : links) {
-        auto link  = entry.second;
+        auto link = entry.second.get();
         total += link->getStrength();
     }
     return total;
 }
 
-void Player::addLink(Link* link) {
-    links[link->getId()] = link;
+void Player::addLink(unique_ptr<Link> link) {
+    char id = link->getId();
+    links[id] = move(link);
 }
 
 Link* Player::getLink(char id) const {
     auto it = links.find(id);
-    return it != links.end() ? it->second : nullptr;
+    return it != links.end() ? it->second.get() : nullptr;
 }
 
 void Player::removeLink(char id) {
@@ -63,7 +74,7 @@ bool Player::ownsLink(char id) const {
 vector<Link*> Player::getAllLinks() const {
     vector<Link*> all;
     for (const auto& entry : links) {
-        auto link = entry.second;
+        auto link = entry.second.get();
         all.push_back(link);
     }
     return all;
@@ -117,15 +128,15 @@ bool Player::hasLostOrWon() const {
 }
 
 // Ability management methods
-void Player::addAbility(Ability* ability) {
-    abilities.push_back(ability);
+void Player::addAbility(unique_ptr<Ability> ability) {
+    abilities.push_back(move(ability));
 }
 
 Ability* Player::getAbility(int abilityId) {
     if (abilityId < 1 || abilityId > static_cast<int>(abilities.size())) {
         return nullptr;
     }
-    return abilities[abilityId - 1]; // Convert to 0-based indexing
+    return abilities[abilityId - 1].get(); // Convert to 0-based indexing
 }
 
 bool Player::isAbilityUsed(int abilityId) const {

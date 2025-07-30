@@ -182,8 +182,8 @@ void Controller::loadLinksFromFile(const string& filename, Player* player, bool 
         LinkType type = parseLinkType(tokens[i]);
         int strength = parseStrength(tokens[i]);
         char id = isPlayer1 ? ('a' + i) : ('A' + i);
-        Link* link = new Link(id, type, strength, player);
-        player->addLink(link);
+        auto link = make_unique<Link>(id, type, strength, player);
+        player->addLink(move(link));
     }
 }
 
@@ -201,8 +201,8 @@ void Controller::generateDefaultLinks(Player* player, bool isPlayer1) {
 
     char id = isPlayer1 ? 'a' : 'A';
     for (const auto& cfg : configs) {
-        Link* link = new Link(id, cfg.first, cfg.second, player);
-        player->addLink(link);
+        auto link = make_unique<Link>(id, cfg.first, cfg.second, player);
+        player->addLink(move(link));
         ++id;
     }
 }
@@ -211,10 +211,10 @@ void Controller::setupPlayers(Player* p1, Player* p2,
                               const string& ability1Str, const string& ability2Str,
                               const string& link1File, const string& link2File) {
     auto p1Abilities = AbilityFactory::createAbilities(ability1Str);
-    for (Ability* ability : p1Abilities) p1->addAbility(ability);
+    for (auto& ability : p1Abilities) p1->addAbility(move(ability));
 
     auto p2Abilities = AbilityFactory::createAbilities(ability2Str);
-    for (Ability* ability : p2Abilities) p2->addAbility(ability);
+    for (auto& ability : p2Abilities) p2->addAbility(move(ability));
 
     if (!link1File.empty()) {
         loadLinksFromFile(link1File, p1, true);

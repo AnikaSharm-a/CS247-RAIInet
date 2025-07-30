@@ -3,6 +3,7 @@
 #include <vector>
 #include <set>
 #include <string>
+#include <memory>
 #include "linkType.h"
 using namespace std;
 
@@ -11,8 +12,8 @@ class Ability;   // forward declare
 
 class Player {
     int id;
-    map<char, Link*> links;
-    vector<Ability*> abilities;
+    map<char, unique_ptr<Link>> links;
+    vector<unique_ptr<Ability>> abilities;
     set<int> usedAbilities;
     int downloadedVirus = 0;
     int downloadedData = 0;
@@ -31,7 +32,7 @@ public:
     int getStrengthSum() const;
 
     // Link management
-    void addLink(Link* link);
+    void addLink(unique_ptr<Link> link);
     Link* getLink(char id) const;
     void removeLink(char id);
     bool ownsLink(char id) const;
@@ -55,7 +56,7 @@ public:
     bool hasLostOrWon() const;
     
     // Ability management
-    void addAbility(Ability* ability);
+    void addAbility(unique_ptr<Ability> ability);
     Ability* getAbility(int abilityId);
     bool isAbilityUsed(int abilityId) const;
     void markAbilityUsed(int abilityId);

@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <vector>
+#include <memory>
 #include "board.h"
 #include "player.h"
 // #include "controller.h"
@@ -11,7 +12,7 @@ class Controller;  // forward declare
 
 class Game {
     Board board;
-    vector<Player*> players;
+    vector<unique_ptr<Player>> players;
     int currentPlayerIdx;
     bool gameOver;
     Controller* controller;
@@ -37,6 +38,8 @@ public:
     const std::map<std::pair<int, int>, std::pair<CellType, std::vector<std::pair<int, int>>>>& getFoggedCells() const;
     void setTurnNumber(int t);
 
+    // Add player management
+    void addPlayer(unique_ptr<Player> player);
 
     bool playerMove(char linkId, Direction dir);
     Player* getOpponentPlayer();

@@ -4,6 +4,7 @@
 #include <cassert>
 #include <algorithm>
 #include <random>
+#include <memory>
 
 #include "game.h"
 #include "controller.h"
@@ -18,12 +19,12 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
     TextDisplay td(8);
-    GraphicDisplay* gd = nullptr;
+    unique_ptr<GraphicDisplay> gd = nullptr;
     View* viewToUse = &td;
     Game game;
 
-    Player *p1 = new Player(1);
-    Player *p2 = new Player(2);
+    auto p1 = make_unique<Player>(1);
+    auto p2 = make_unique<Player>(2);
 
     // Default ability strings
     string ability1Str = "LFDSP";
@@ -63,19 +64,19 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    game.getPlayers().push_back(p1);
-    game.getPlayers().push_back(p2);
+    game.addPlayer(move(p1));
+    game.addPlayer(move(p2));
 
     if (graphics) {
-        gd = new GraphicDisplay(8, 500, 700);
-        viewToUse = gd;
+        gd = make_unique<GraphicDisplay>(8, 500, 700);
+        viewToUse = gd.get();
     }
 
     Controller controller(viewToUse, &game);
     game.setController(&controller);
 
     try {
-        controller.setupPlayers(p1, p2, ability1Str, ability2Str, link1File, link2File);
+        controller.setupPlayers(game.getPlayers()[0], game.getPlayers()[1], ability1Str, ability2Str, link1File, link2File);
     } catch (const exception& e) {
         cerr << "Setup failed: " << e.what() << "\n";
         cerr << "\n" << AbilityFactory::getUsageInfo() << "\n";
@@ -86,10 +87,6 @@ int main(int argc, char* argv[]) {
 
     cout << "Welcome to RAIInet! Player 1 goes first.\n";
     controller.play(cin);
-
-    delete p1;
-    delete p2;
-    delete gd;
 
     return 0;
 }

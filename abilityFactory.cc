@@ -12,38 +12,38 @@
 #include <map>
 using namespace std;
 
-Ability* AbilityFactory::createAbility(char abilityCode) {
+unique_ptr<Ability> AbilityFactory::createAbility(char abilityCode) {
     switch (abilityCode) {
         case 'L':
         case 'l':
-            return new LinkBoost();
+            return make_unique<LinkBoost>();
         case 'F':
         case 'f':
-            return new FireWall();
+            return make_unique<FireWall>();
         case 'D':
         case 'd':
-            return new Download();
+            return make_unique<Download>();
         case 'S':
         case 's':
-            return new Scan();
+            return make_unique<Scan>();
         case 'P':
         case 'p':
-            return new Polarize();
+            return make_unique<Polarize>();
         case 'J':
         case 'j':
-            return new Jam();
+            return make_unique<Jam>();
         case 'E':
         case 'e':
-            return new Fog();
+            return make_unique<Fog>();
         case 'A':
         case 'a':
-            return new AreaScan();
+            return make_unique<AreaScan>();
         default:
             throw invalid_argument("Invalid ability code: " + string(1, abilityCode));
     }
 }
 
-vector<Ability*> AbilityFactory::createAbilities(const string& abilityString) {
+vector<unique_ptr<Ability>> AbilityFactory::createAbilities(const string& abilityString) {
     if (!isValidAbilityString(abilityString)) {
         string errorMsg = "Invalid ability string: " + abilityString + ". ";
         
@@ -70,14 +70,14 @@ vector<Ability*> AbilityFactory::createAbilities(const string& abilityString) {
         throw invalid_argument(errorMsg);
     }
     
-    vector<Ability*> abilities;
+    vector<unique_ptr<Ability>> abilities;
     for (char code : abilityString) {
         abilities.push_back(createAbility(code));
     }
     return abilities;
 }
 
-vector<Ability*> AbilityFactory::getDefaultAbilities() {
+vector<unique_ptr<Ability>> AbilityFactory::getDefaultAbilities() {
     return createAbilities("LFDSP"); // LinkBoost, Firewall, Download, Scan, Polarize
 }
 
