@@ -25,7 +25,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
 
 
     // Print Player 1 info
-    out << "Player 1:\n";
+    out << "\nPlayer 1:\n";
     out << "Downloaded: " << p1->getDownloadedData() << "D, " << p1->getDownloadedVirus() << "V\n";
     out << "Abilities: " << p1->getNumUnusedAbilities() << "\n";
 
@@ -127,6 +127,6 @@ void TextDisplay::print(const Game &game, ostream &out) const {
             }
         }
     }
-    out << "\n";
+    out << "\n\n";
 }
 
