@@ -15,6 +15,7 @@ const Board* Game::getBoard() const { return &board; }
 
 vector<Player*>& Game::getPlayers() { 
     static vector<Player*> playerPtrs;
+    playerPtrs.clear();
     for (auto& player : players) {
         playerPtrs.push_back(player.get());
     }
@@ -242,8 +243,8 @@ bool Game::playerMove(char id, Direction dir) {
 
     // unjam links that have been jammed for 2+ turns
     for (auto* p : getPlayers()) {
-        for (auto& entry : p->getLinks()) {
-            auto link = entry.second;
+        for (const auto& entry : p->getLinks()) {
+            auto link = entry.second.get();
             if (link->isJammed() && link->getJammedOnTurn() <= turnNumber - 2) {
                 link->unjam();
             }

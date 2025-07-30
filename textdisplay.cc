@@ -45,7 +45,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
     int linkCount = 0;
     for (const auto& pair : p1->getLinks()) {
         char id = pair.first;
-        auto link = pair.second;
+        auto link = pair.second.get();
         if (current == p1) {
             // Current player sees all own links fully
             string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");
@@ -136,7 +136,7 @@ void TextDisplay::print(const Game &game, ostream &out) const {
     int linkCount2 = 0;
     for (const auto& pair : p2->getLinks()) {
         char id = pair.first;
-        auto link = pair.second;
+        auto link = pair.second.get();
         if (current == p2) {
             // Current player sees own links fully
             string typeStr = (link->getType() == LinkType::Virus ? "V" : "D");

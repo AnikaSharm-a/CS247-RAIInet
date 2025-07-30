@@ -25,8 +25,7 @@ public:
 
     // Getters
     int getId() const;
-    map<char, std::shared_ptr<Link>>& getLinks();
-    const map<char, std::shared_ptr<Link>>& getLinks() const;
+    const map<char, unique_ptr<Link>>& getLinks() const;
     set<int>& getUsedAbilities();
     int getDownloadedVirus() const;
     int getDownloadedData() const;

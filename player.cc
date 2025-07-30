@@ -10,24 +10,8 @@ int Player::getId() const {
     return id;
 }
 
-map<char, shared_ptr<Link>>& Player::getLinks() {
-    static map<char, shared_ptr<Link>> linkPtrs;
-    linkPtrs.clear();
-    for (auto& entry : links) {
-        // Create shared_ptr from unique_ptr for external access
-        linkPtrs[entry.first] = shared_ptr<Link>(entry.second.get(), [](Link*){});
-    }
-    return linkPtrs;
-}
-
-const map<char, shared_ptr<Link>>& Player::getLinks() const {
-    static map<char, shared_ptr<Link>> linkPtrs;
-    linkPtrs.clear();
-    for (const auto& entry : links) {
-        // Create shared_ptr from unique_ptr for external access
-        linkPtrs[entry.first] = shared_ptr<Link>(entry.second.get(), [](Link*){});
-    }
-    return linkPtrs;
+const map<char, unique_ptr<Link>>& Player::getLinks() const {
+    return links;
 }
 
 set<int>& Player::getUsedAbilities() {
