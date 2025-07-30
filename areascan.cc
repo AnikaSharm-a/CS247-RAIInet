@@ -49,8 +49,4 @@ void AreaScan::use(Game* game,
             }
         }
     }
-    
-    if (revealedCount == 0) {
-        throw invalid_argument("AreaScan: no opponent links found in scan area");
-    }
 }

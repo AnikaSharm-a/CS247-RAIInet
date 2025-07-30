@@ -404,33 +404,30 @@ void Game::removeFogEffect() {
 
 void Game::updateFog() {
     Board* board = getBoard();
-    vector<pair<int, int>> cellsToCheck;
-
-    // Collect all fogged cells
-    for (const auto& entry : foggedCells) {
-        cellsToCheck.push_back(entry.first);
-    }
+    vector<pair<int, int>> cellsToErase;
 
     // Check each fogged cell
-    for (const auto& coord : cellsToCheck) {
-        auto& fogEntry = foggedCells[coord];
-        auto& fogList = fogEntry.second;
+    for (const auto& entry : foggedCells) {
+        const auto& coord = entry.first;
+        const auto& fogEntry = entry.second;
+        const auto& fogList = fogEntry.second;
         
         // Remove expired fogs (older than 5 turns)
-        fogList.erase(
-            remove_if(fogList.begin(), fogList.end(),
+        auto& mutableFogList = foggedCells[coord].second;
+        mutableFogList.erase(
+            remove_if(mutableFogList.begin(), mutableFogList.end(),
                 [this](const auto& fog) {
                     int appliedTurn = fog.first;
                     return (turnNumber - appliedTurn >= 5);
                 }),
-            fogList.end()
+            mutableFogList.end()
         );
 
-        // If no fogs remain, restore original cell type
-        if (fogList.empty()) {
+        // If no fogs remain, mark for restoration
+        if (mutableFogList.empty()) {
             CellType originalType = fogEntry.first;
             board->at(coord.first, coord.second).setType(originalType);
-            foggedCells.erase(coord);
+            cellsToErase.push_back(coord);
             
             // Notify about cell change
             if (controller) {
@@ -439,8 +436,13 @@ void Game::updateFog() {
         }
     }
     
+    // Erase empty fog entries after iteration is complete
+    for (const auto& coord : cellsToErase) {
+        foggedCells.erase(coord);
+    }
+    
     // Notify about board change if any cells were updated
-    if (!cellsToCheck.empty() && controller) {
+    if (!cellsToErase.empty() && controller) {
         controller->notifyBoardChanged();
     }
 }
