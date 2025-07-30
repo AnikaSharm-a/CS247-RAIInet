@@ -36,15 +36,15 @@ bool Game::isGameOver() const { return gameOver; }
 Controller* Game::getController() { return controller; }
 int Game::getCurrentTurn() const { return turnNumber; }
 
-// setter for turn number with notification
+// set turn number
 void Game::setTurnNumber(int t) { 
     turnNumber = t; 
-    if (controller && notificationsEnabled) {
+    if (notificationsEnabled) {
         controller->notifyGameStateChanged();
     }
 }
 
-// setter for current player with notification
+// set current player
 void Game::setCurrentPlayerIdx(int idx) { 
     currentPlayerIdx = idx; 
     if (controller && notificationsEnabled) {
@@ -52,7 +52,7 @@ void Game::setCurrentPlayerIdx(int idx) {
     }
 }
 
-// setter for game over state with notification
+// set game over state
 void Game::setGameOver(bool over) { 
     gameOver = over; 
     if (over && controller && notificationsEnabled) {
@@ -113,7 +113,8 @@ void Game::startGame() {
 
     // only do setup if no links have been placed yet
     if (players.size() < 2) return;
-    // place links already created for each player on the board
+
+    // set up links for players
     setupLinksForPlayer(players[0].get(), true);
     setupLinksForPlayer(players[1].get(), false);
     
@@ -128,7 +129,7 @@ void Game::startGame() {
 bool Game::checkVictory() {
     for (auto& p : players) {
         if (p->hasWon()) {
-            cout << "Player " << p->getId() << " wins by downloading 4 data!\n";
+            cout << "Player " << p->getId() << " wins by downloading 4 data!" << endl;
             gameOver = true;
             if (controller) {
                 controller->notifyGameStateChanged();
@@ -136,11 +137,11 @@ bool Game::checkVictory() {
             return true;
         }
         if (p->hasLost()) {
-            // find the opponent (assuming 2 players)
+            // find the opponent
             int loserId = p->getId();
             int winnerId = (loserId == 1) ? 2 : 1;
-            cout << "Player " << loserId << " loses by downloading 4 viruses!\n";
-            cout << "Player " << winnerId << " wins!\n";
+            cout << "Player " << loserId << " loses by downloading 4 viruses!" << endl;
+            cout << "Player " << winnerId << " wins!" << endl;
             gameOver = true;
             if (controller) {
                 controller->notifyGameStateChanged();
@@ -151,13 +152,13 @@ bool Game::checkVictory() {
     return false;
 }
 
-// returns the opposing player (assuming 2 players)
+// returns the opposing player
 Player* Game::getOpponentPlayer() {
     return players[(currentPlayerIdx + 1) % players.size()].get();
 }
 
-// handles downloading a link to a player's collection
-void Game::download(std::shared_ptr<Link> link, Player* targetPlayer) {
+// downloading a link
+void Game::download(shared_ptr<Link> link, Player* targetPlayer) {
     targetPlayer->incrementDownload(link.get());
     
     // notify about the download
@@ -169,19 +170,17 @@ void Game::download(std::shared_ptr<Link> link, Player* targetPlayer) {
     checkVictory();
 }
 
-// handles the move command, coordinating board and player state
 bool Game::playerMove(char id, Direction dir) {
     Player* currentPlayer = players[currentPlayerIdx].get();
     Player* opponent = getOpponentPlayer();
 
-    // board::moveLink should return a MoveOutcome struct describing what happened
     auto outcome = board.moveLink(id, currentPlayer, dir);
 
     if (!outcome.success) {
         if (outcome.result == MoveResult::Jammed) {
-            cout << "Link '" << id << "' is jammed.\n";
+            cout << "Link '" << id << "' is jammed." << endl;
         } else {
-            cout << "Invalid move.\n";
+            cout << "Invalid move." << endl;
         }
         return false;
     }
@@ -189,11 +188,9 @@ bool Game::playerMove(char id, Direction dir) {
     // handle downloads or battles based on outcome
     switch (outcome.result) {
         case MoveResult::Moved:
-            // normal move, no download
             break;
         case MoveResult::BattleWon:
             // current player downloads opponent's link
-            // remove boost effect from the downloaded link
             if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
                 outcome.affectedLink->removeBoost();
             }
@@ -201,7 +198,6 @@ bool Game::playerMove(char id, Direction dir) {
             break;
         case MoveResult::BattleLost:
             // opponent downloads current player's link
-            // remove boost effect from the downloaded link
             if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
                 outcome.affectedLink->removeBoost();
             }
@@ -209,7 +205,6 @@ bool Game::playerMove(char id, Direction dir) {
             break;
         case MoveResult::DownloadedOffBoard:
             // current player downloads their own link escaped off board
-            // remove boost effect from the downloaded link
             if (outcome.movedLink && outcome.movedLink->isBoosted()) {
                 outcome.movedLink->removeBoost();
             }
@@ -217,7 +212,6 @@ bool Game::playerMove(char id, Direction dir) {
             break;
         case MoveResult::DownloadedOnServerPort:
             // opponent downloads current player's link that moved onto their server port
-            // remove boost effect from the downloaded link
             if (outcome.movedLink && outcome.movedLink->isBoosted()) {
                 outcome.movedLink->removeBoost();
             }
@@ -225,7 +219,6 @@ bool Game::playerMove(char id, Direction dir) {
             break;
         case MoveResult::DownloadedByFirewall:
             // virus link was downloaded by firewall effect
-            // remove boost effect from the downloaded link
             if (outcome.affectedLink && outcome.affectedLink->isBoosted()) {
                 outcome.affectedLink->removeBoost();
             }
@@ -268,6 +261,7 @@ bool Game::playerMove(char id, Direction dir) {
 
 // handles ability usage by a player
 void Game::useAbility(Player* player, int abilityId, char args[]) {
+    // check for valid usage first
     if (abilityId < 1 || abilityId > player->getNumAbilities()) {
         throw invalid_argument("Invalid ability ID");
     }
@@ -285,20 +279,9 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
     int row = -1, col = -1;
 
     // parse arguments based on ability type
-    if (abilityName == "LinkBoost") {
+    if (abilityName == "LinkBoost" || abilityName == "AreaScan") {
         if (args[0] == '\0') {
-            throw invalid_argument("LinkBoost requires a link ID");
-        }
-        char linkId = args[0];
-        auto pos = board.findLinkPosition(linkId, player);
-        if (pos.first == -1) {
-            throw invalid_argument("Link not found or not owned by player");
-        }
-        row = pos.first;
-        col = pos.second;
-    } else if (abilityName == "AreaScan") {
-        if (args[0] == '\0') {
-            throw invalid_argument("AreaScan requires a link ID");
+            throw invalid_argument(abilityName + " requires a link ID");
         }
         char linkId = args[0];
         auto pos = board.findLinkPosition(linkId, player);
@@ -314,8 +297,8 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
         char linkId = args[0];
         // find the link on the board (can be any player's link)
         bool found = false;
-        for (int r = 0; r < 8 && !found; ++r) {
-            for (int c = 0; c < 8 && !found; ++c) {
+        for (int r = 0; r < 8 && !found; r++) {
+            for (int c = 0; c < 8 && !found; c++) {
                 auto link = board.at(r, c).getLink();
                 if (link && link->getId() == linkId) {
                     row = r;
@@ -329,6 +312,7 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
         }
     } else {
         // parse coordinates for abilities that need position
+        // used for fog and firewall
         string argsStr(args);
         size_t spacePos = argsStr.find(' ');
         if (spacePos == string::npos) {
@@ -376,8 +360,8 @@ void Game::applyFogEffect(int row, int col, int ownerId) {
     int startCol = max(0, col - 1);
     int endCol = min(7, col + 1);
 
-    for (int r = startRow; r <= endRow; ++r) {
-        for (int c = startCol; c <= endCol; ++c) {
+    for (int r = startRow; r <= endRow; r++) {
+        for (int c = startCol; c <= endCol; c++) {
             Cell& cell = board->at(r, c);
             auto coord = make_pair(r, c);
 
@@ -392,14 +376,12 @@ void Game::applyFogEffect(int row, int col, int ownerId) {
                 cell.setType(CellType::Fog);
             }
             
-            // notify about cell change
             if (controller) {
                 controller->notifyCellChanged(r, c);
             }
         }
     }
     
-    // notify about board change
     if (controller) {
         controller->notifyBoardChanged();
     }
@@ -417,7 +399,6 @@ void Game::removeFogEffect() {
         CellType originalType = entry.second.first;
         board->at(r, c).setType(originalType);
         
-        // notify about cell change
         if (controller) {
             controller->notifyCellChanged(r, c);
         }
@@ -425,12 +406,11 @@ void Game::removeFogEffect() {
 
     foggedCells.clear();
 
-    // notify about board change
     if (controller) {
         controller->notifyBoardChanged();
     }
 
-    cout << "Fog effect removed and cells restored.\n";
+    cout << "Fog effect removed and cells restored." << endl;
 }
 
 // updates fog effects, removing expired ones (older than 5 turns)
@@ -438,13 +418,11 @@ void Game::updateFog() {
     Board* board = getBoard();
     vector<pair<int, int>> cellsToErase;
 
-    // check each fogged cell
     for (const auto& entry : foggedCells) {
         const auto& coord = entry.first;
         const auto& fogEntry = entry.second;
-        const auto& fogList = fogEntry.second;
         
-        // remove expired fogs (older than 5 turns)
+        // remove expired fogs (fogs that have lasted more than 5 turns)
         auto& mutableFogList = foggedCells[coord].second;
         mutableFogList.erase(
             remove_if(mutableFogList.begin(), mutableFogList.end(),
@@ -480,14 +458,16 @@ void Game::updateFog() {
 }
 
 // sets up players with abilities and links
-void Game::setupPlayers(Player* p1, Player* p2,
-                        const string& ability1Str, const string& ability2Str,
-                        const string& link1File, const string& link2File) {
+void Game::setupPlayers(Player* p1, Player* p2, const string& ability1Str, const string& ability2Str, const string& link1File, const string& link2File) {
     auto p1Abilities = AbilityFactory::createAbilities(ability1Str);
-    for (auto& ability : p1Abilities) p1->addAbility(move(ability));
+    for (auto& ability : p1Abilities) {
+        p1->addAbility(move(ability));
+    }
 
     auto p2Abilities = AbilityFactory::createAbilities(ability2Str);
-    for (auto& ability : p2Abilities) p2->addAbility(move(ability));
+    for (auto& ability : p2Abilities) {
+        p2->addAbility(move(ability));
+    }
 
     if (!link1File.empty()) {
         controller->loadLinksFromFile(link1File, p1, true);

@@ -5,10 +5,9 @@
 #include <memory>
 #include "board.h"
 #include "player.h"
-// #include "controller.h"
 using namespace std;
 
-class Controller;  // forward declare
+class Controller;
 
 class Game {
     Board board;
@@ -16,15 +15,16 @@ class Game {
     int currentPlayerIdx;
     bool gameOver;
     Controller* controller;
-    int turnNumber; // Track the current turn number
-    bool notificationsEnabled; // Flag to control notifications during initialization
-    // Map from cell coordinates to pair of (originalType, vector of fog effects (appliedTurn, ownerId))
-    std::map<std::pair<int, int>, std::pair<CellType, std::vector<std::pair<int, int>>>> foggedCells;
+    int turnNumber; // track the current turn number
+    bool notificationsEnabled; //flag to control notifications during initialization
+
+    // Map cell coordinates to pair of cellType, and a vector of fog effects (appliedTurn, ownerId)
+    map<pair<int, int>, pair<CellType, vector<pair<int, int>>>> foggedCells;
 
 public:
     void startGame();
     bool checkVictory();
-    void download(std::shared_ptr<Link> link, Player* targetPlayer);
+    void download(shared_ptr<Link> link, Player* targetPlayer);
     void useAbility(Player* player, int abilityId, char args[]);
 
     Board* getBoard();
@@ -36,16 +36,16 @@ public:
     Controller* getController();
     void setupLinksForPlayer(Player* p, bool isPlayer1);
     int getCurrentTurn() const; // Get current turn number
-    const std::map<std::pair<int, int>, std::pair<CellType, std::vector<std::pair<int, int>>>>& getFoggedCells() const;
+    const map<pair<int, int>, pair<CellType, vector<pair<int, int>>>>& getFoggedCells() const;
     void setTurnNumber(int t);
 
-    // Add player management
+    // player management
     void addPlayer(unique_ptr<Player> player);
 
     bool playerMove(char linkId, Direction dir);
     Player* getOpponentPlayer();
 
-    // Setters
+    // setters
     void setCurrentPlayerIdx(int idx);
     void setGameOver(bool over);
     void setController(Controller* c);
@@ -54,11 +54,9 @@ public:
     void removeFogEffect();
     void updateFog();
     
-    // Player setup methods
+    // player setup methods
     void generateDefaultLinks(Player* player, bool isPlayer1);
-    void setupPlayers(Player* p1, Player* p2,
-                      const string& ability1Str, const string& ability2Str,
-                      const string& link1File, const string& link2File);
+    void setupPlayers(Player* p1, Player* p2, const string& ability1Str, const string& ability2Str, const string& link1File, const string& link2File);
 };
 
-#endif // GAME_H
+#endif
