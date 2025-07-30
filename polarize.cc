@@ -20,9 +20,6 @@ void Polarize::use(Game* game,
         throw invalid_argument("Polarize: no link at target cell");
 
     Link* link = cell.getLink();
-    // only on opponent’s link
-    if (link->getOwner() == player)
-        throw invalid_argument("Polarize: can only polarize opponent’s link");
 
     // flip type, leave strength alone
     link->setType(link->getType() == LinkType::Data ? LinkType::Virus : LinkType::Data);
