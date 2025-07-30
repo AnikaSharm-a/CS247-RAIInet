@@ -131,10 +131,6 @@ void Controller::play(istream &in) {
 
         if (game->checkVictory()) break;
 
-        view->print(*game, cout);
-
-        if (game->checkVictory()) break;
-
         for (auto* p : game->getPlayers()) {
             for (auto& entry : p->getLinks()) {
                 Link* link = entry.second;
@@ -147,6 +143,7 @@ void Controller::play(istream &in) {
         game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
         game->updateFog();
         game->setTurnNumber(game->getCurrentTurn() + 1); // Make sure this setter exists in your Game class
+        view->print(*game, cout);
     }
 }
 
