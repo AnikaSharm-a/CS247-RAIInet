@@ -8,7 +8,7 @@
 #include <vector>
 using namespace std;
 
-class Game;  // Forward declaration
+class Game;
 
 class GraphicDisplay : public View {
     mutable Xwindow xw;
@@ -16,21 +16,20 @@ class GraphicDisplay : public View {
     int cellWidth;
     int cellHeight;
     int margin = 4;
-    Game* gameRef;  // Reference to the game for redrawing
+    Game* gameRef;  // reference to the game for redrawing
 
-    // Keep a snapshot of last drawn characters to allow partial redraw
+    // keep a snapshot of last drawn characters to allow partial redraw
     struct DrawnState {
         char symbol;
         bool boosted;
         bool visible;
-        LinkType type; // only meaningful if visible
+        LinkType type;
         bool jammed;
         bool fogged;
     };
 
+    // storing previous states
     vector<vector<DrawnState>> lastDrawn;
-
-    // --- ADD THESE CACHES ---
     mutable string lastP1Info;
     mutable string lastP2Info;
 
@@ -39,14 +38,11 @@ class GraphicDisplay : public View {
 public:
     GraphicDisplay(int gridSize, int width = 500, int height = 500);
 
-    // Observer pattern notification method
+    // observer pattern notification method
     void notify(const NotificationData& data) override;
 
-    // Set the game reference
+    // set the game reference
     void setGameRef(Game* game) { gameRef = game; }
-
-    // Unused in this approach, but left for completeness
-    // void notify(int row, int col, CellType state) override;
 
     void print(const Game &game, ostream &out) const override;
 };

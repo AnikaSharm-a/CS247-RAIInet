@@ -11,11 +11,8 @@ public:
     LinkBoost();
     ~LinkBoost() override = default;
 
-    // row/col should locate *your* link on the board
-    void use(Game* game,
-             Player* player,
-             int row,
-             int col) override;
+    // row/col should locate your link on the board
+    void use(Game* game, Player* player, int row, int col) override;
 };
 
 #endif
