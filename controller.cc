@@ -114,7 +114,7 @@ void Controller::play(istream &in) {
     // Loop until the game ends
     while (!game->checkVictory() && in) {
         Player* currentPlayer = game->getPlayers()[game->getCurrentPlayerIdx()];
-        cout << "Player " << (game->getCurrentPlayerIdx() + 1) << "'s turn."<<endl;
+        cout << "Player " << (game->getCurrentPlayerIdx() + 1) << "'s turn:"<<endl;
 
         bool abilityUsed = false;
         bool moved = false;
