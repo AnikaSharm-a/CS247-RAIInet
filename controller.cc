@@ -3,6 +3,8 @@
 #include "game.h"
 #include "player.h"
 #include "view.h"
+#include "graphicdisplay.h"
+#include "textdisplay.h"
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -15,7 +17,69 @@
 using namespace std;
 
 Controller::Controller(unique_ptr<View> view, unique_ptr<Game> game)
-    : view(move(view)), game(move(game)) {}
+    : view(move(view)), game(move(game)) {
+    
+    // Register the main view as an observer
+    attachObserver(this->view.get());
+    
+    // Set up controller references in Game and Board
+    this->game->setController(this);
+    this->game->getBoard()->setController(this);
+    
+    // Set game reference in views
+    if (GraphicDisplay* gd = dynamic_cast<GraphicDisplay*>(this->view.get())) {
+        gd->setGameRef(this->game.get());
+    } else if (TextDisplay* td = dynamic_cast<TextDisplay*>(this->view.get())) {
+        td->setGameRef(this->game.get());
+    }
+}
+
+// Observer management methods
+void Controller::attachObserver(View* observer) {
+    observers.push_back(observer);
+}
+
+void Controller::detachObserver(View* observer) {
+    auto it = find(observers.begin(), observers.end(), observer);
+    if (it != observers.end()) {
+        observers.erase(it);
+    }
+}
+
+void Controller::notifyObservers(const NotificationData& data) {
+    for (auto observer : observers) {
+        observer->notify(data);
+    }
+}
+
+// Convenience notification methods
+void Controller::notifyCellChanged(int row, int col) {
+    notifyObservers(NotificationData(NotificationType::CellChanged, row, col));
+}
+
+void Controller::notifyPlayerChanged(int playerId) {
+    notifyObservers(NotificationData(NotificationType::PlayerChanged, playerId));
+}
+
+void Controller::notifyGameStateChanged() {
+    notifyObservers(NotificationData(NotificationType::GameStateChanged));
+}
+
+void Controller::notifyBoardChanged() {
+    notifyObservers(NotificationData(NotificationType::BoardChanged));
+}
+
+void Controller::notifyLinkMoved(char linkId) {
+    notifyObservers(NotificationData(NotificationType::LinkMoved, linkId));
+}
+
+void Controller::notifyLinkRevealed(char linkId) {
+    notifyObservers(NotificationData(NotificationType::LinkRevealed, linkId));
+}
+
+void Controller::notifyLinkDownloaded(char linkId) {
+    notifyObservers(NotificationData(NotificationType::LinkDownloaded, linkId));
+}
 
 bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPlayer, bool &moved, bool &abilityUsed) {
     if (cmd == "quit") {
@@ -23,6 +87,9 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
     }
 
     else if (cmd == "board") {
+        // With observer pattern, we don't need to explicitly call print
+        // The view will be notified of changes automatically
+        // But we can still call print for immediate display
         view->print(*game, cout);
     }
 
@@ -56,7 +123,7 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
         try {
             game->useAbility(currentPlayer, abilityId, args);
             abilityUsed = true;
-            view->print(*game, cout);
+            // Observer pattern will handle the display update automatically
         } catch (const exception& e) {
             cout << "Ability failed: " << e.what() << endl;
         }
@@ -142,7 +209,7 @@ void Controller::play(istream &in) {
         game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
         game->updateFog();
         game->setTurnNumber(game->getCurrentTurn() + 1);
-        view->print(*game, cout);
+        // Observer pattern will handle the display update automatically
     }
 }
 

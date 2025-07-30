@@ -7,13 +7,26 @@
 
 using namespace std;
 
-TextDisplay::TextDisplay(int gridSize) {
+TextDisplay::TextDisplay(int gridSize) : gameRef(nullptr), hasRedrawnThisTurn(false) {
     theDisplay.assign(gridSize, vector<char>(gridSize, '.'));
     // Mark server ports
     theDisplay[0][3] = 'S';
     theDisplay[0][4] = 'S';
     theDisplay[7][3] = 'S';
     theDisplay[7][4] = 'S';
+}
+
+void TextDisplay::notify(const NotificationData& data) {
+    // Only redraw for link movements - this is the most important event
+    if (gameRef && data.type == NotificationType::LinkMoved) {
+        cout << "\n"; // Add spacing for link movements
+        print(*gameRef, cout);
+    }
+    // For turn changes, just add spacing but don't redraw (since we already redrew for the move)
+    else if (data.type == NotificationType::GameStateChanged) {
+        cout << "\n\n"; // Add extra spacing for turn changes
+    }
+    // Ignore all other notifications
 }
 
 void TextDisplay::print(const Game &game, ostream &out) const {
@@ -129,4 +142,5 @@ void TextDisplay::print(const Game &game, ostream &out) const {
     }
     out << "\n\n";
 }
+
 
