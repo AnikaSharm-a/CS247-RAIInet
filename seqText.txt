@@ -1,0 +1,9 @@
+board
+abilities
+move a down
+move B up
+ability 4 H
+move b right
+move C left
+board
+quit

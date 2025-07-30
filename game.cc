@@ -254,8 +254,9 @@ bool Game::playerMove(char id, Direction dir) {
     // update fog effects
     updateFog();
 
-    // increment turn number
+    // increment turn number AND switch players
     setTurnNumber(turnNumber + 1);
+    setCurrentPlayerIdx((currentPlayerIdx + 1) % players.size());
 
     return true;
 }

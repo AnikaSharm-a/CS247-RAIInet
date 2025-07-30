@@ -196,7 +196,8 @@ void Controller::play(istream &in) {
 
         if (game->checkVictory()) break;
 
-        game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
+        // REMOVE THIS LINE - Game now handles turn switching
+        // game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
     }
 }
 
