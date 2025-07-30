@@ -14,8 +14,8 @@
 
 using namespace std;
 
-Controller::Controller(View* view, Game* game)
-    : view(view), game(game) {}
+Controller::Controller(unique_ptr<View> view, unique_ptr<Game> game)
+    : view(move(view)), game(move(game)) {}
 
 bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPlayer, bool &moved, bool &abilityUsed) {
     if (cmd == "quit") {
@@ -109,7 +109,6 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
     return true;
 }
 
-
 void Controller::play(istream &in) {
     // Loop until the game ends
     while (!game->checkVictory() && in) {
@@ -142,7 +141,7 @@ void Controller::play(istream &in) {
 
         game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
         game->updateFog();
-        game->setTurnNumber(game->getCurrentTurn() + 1); // Make sure this setter exists in your Game class
+        game->setTurnNumber(game->getCurrentTurn() + 1);
         view->print(*game, cout);
     }
 }

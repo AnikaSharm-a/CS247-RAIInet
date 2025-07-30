@@ -18,10 +18,10 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    TextDisplay td(8);
+    // Create unique_ptr objects that will be owned by the controller
+    auto td = make_unique<TextDisplay>(8);
     unique_ptr<GraphicDisplay> gd = nullptr;
-    View* viewToUse = &td;
-    Game game;
+    auto game = make_unique<Game>();
 
     auto p1 = make_unique<Player>(1);
     auto p2 = make_unique<Player>(2);
@@ -64,26 +64,30 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    game.addPlayer(move(p1));
-    game.addPlayer(move(p2));
+    game->addPlayer(move(p1));
+    game->addPlayer(move(p2));
 
+    // Handle graphics mode
+    unique_ptr<View> viewToUse;
     if (graphics) {
         gd = make_unique<GraphicDisplay>(8, 500, 700);
-        viewToUse = gd.get();
+        viewToUse = move(gd);
+    } else {
+        viewToUse = move(td);
     }
 
-    Controller controller(viewToUse, &game);
-    game.setController(&controller);
+    // Create controller with ownership of both view and game
+    Controller controller(move(viewToUse), move(game));
 
     try {
-        controller.setupPlayers(game.getPlayers()[0], game.getPlayers()[1], ability1Str, ability2Str, link1File, link2File);
+        controller.setupPlayers(controller.getGame()->getPlayers()[0], controller.getGame()->getPlayers()[1], ability1Str, ability2Str, link1File, link2File);
     } catch (const exception& e) {
         cerr << "Setup failed: " << e.what() << "\n";
         cerr << "\n" << AbilityFactory::getUsageInfo() << "\n";
         return 1;
     }
 
-    game.startGame();
+    controller.getGame()->startGame();
 
     cout << "Welcome to RAIInet! Player 1 goes first.\n";
     controller.play(cin);
