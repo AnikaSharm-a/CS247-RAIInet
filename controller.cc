@@ -156,9 +156,16 @@ bool Controller::parseCommand(const string& cmd, istream& in, Player* currentPla
             bool cont = true;
             while (cont) {
                 string nextCmd;
-                if (!(fileIn >> nextCmd)) break;
+                fileIn >> nextCmd;
+                if (fileIn.eof()) {
+                    return false; // Treat EOF as quit
+                }
+                if (!fileIn) {
+                    cout << "Error reading sequence file\n";
+                    break;
+                }
                 cont = parseCommand(nextCmd, fileIn, currentPlayer, moved, abilityUsed);
-                if (!cont) return false;
+                if (!cont) return false; // quit or game over from inside sequence
             }
         }
         return true;
