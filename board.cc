@@ -29,7 +29,7 @@ pair<int, int> Board::findLinkPosition(char id, Player* player) {
             if (link && link->getId() == id) {
                 // make sure that the link is owned by the current player
                 if (link->getOwner() != player) {
-                    cout << "You cannot move link '" << id
+                    cout << "You cannot use link '" << id
                               << " - it belongs to the other player." << endl;
                     return {-1, -1};
                 }

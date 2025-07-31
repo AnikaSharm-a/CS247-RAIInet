@@ -336,7 +336,7 @@ void Game::useAbility(Player* player, int abilityId, char args[]) {
             throw invalid_argument("Coordinates out of bounds");
         }
     }
-
+    cout << "Using " << abilityName << " on " << row << ", " << col << endl;
     try {
         ability->use(this, player, row, col);
         player->markAbilityUsed(abilityId);

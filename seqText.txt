@@ -6,4 +6,3 @@ ability 4 H
 move b right
 move C left
 board
-quit

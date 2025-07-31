@@ -197,14 +197,12 @@ void Controller::play(istream &in) {
             if (!(in >> cmd)) break; // end of file or stream
 
             if (!parseCommand(cmd, in, currentPlayer, moved, abilityUsed)) {
-                return; // quit or EOF
+                return;
             }
         }
 
         if (game->checkVictory()) break;
 
-        // REMOVE THIS LINE - Game now handles turn switching
-        // game->setCurrentPlayerIdx((game->getCurrentPlayerIdx() + 1) % game->getPlayers().size());
     }
 }
 
